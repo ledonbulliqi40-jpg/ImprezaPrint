@@ -9,219 +9,170 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: "10mb" }));
 
-app.use(session({
-secret: "ImprezaPrint-Admin-Secret-2026",
-resave: false,
-saveUninitialized: false,
-cookie: {
-httpOnly: true,
-secure: false,
-maxAge: 1000 * 60 * 60 * 8
-}
-}));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || "ImprezaPrint-Admin-Secret-2026",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: false,
+            maxAge: 8 * 60 * 60 * 1000
+        }
+    })
+);
 
-app.use(express.static(path.join(__dirname, "..", "frontend")));
+// Frontend
+app.use(express.static(path.join(__dirname, "../frontend")));
 
-/* ADMIN LOGIN */
+// =========================
+// ADMIN LOGIN
+// =========================
 
 app.post("/api/admin/login", (req, res) => {
+    const { username, password } = req.body;
 
-```
-const { username, password } = req.body;
-
-if (!username || !password) {
-    return res.status(400).json({
-        success: false,
-        message: "Plotëso username dhe password."
-    });
-}
-
-const sql = `
-    SELECT *
-    FROM admins
-    WHERE username = ?
-    LIMIT 1
-`;
-
-db.query(sql, [username], async (err, results) => {
-
-    if (err) {
-        console.error("Gabim gjatë login:", err);
-
-        return res.status(500).json({
+    if (!username || !password) {
+        return res.status(400).json({
             success: false,
-            message: "Gabim me databazën."
+            message: "Plotëso username dhe password."
         });
     }
 
-    if (results.length === 0) {
-        return res.status(401).json({
-            success: false,
-            message: "Username ose password gabim."
-        });
-    }
+    const sql = `
+        SELECT *
+        FROM admins
+        WHERE username = ?
+        LIMIT 1
+    `;
 
-    const admin = results[0];
+    db.query(sql, [username], async (err, results) => {
+        if (err) {
+            console.error("Gabim login:", err);
+            return res.status(500).json({
+                success: false,
+                message: "Gabim me databazën."
+            });
+        }
 
-    const passwordCorrect = await bcrypt.compare(
-        password,
-        admin.password
-    );
+        if (results.length === 0) {
+            return res.status(401).json({
+                success: false,
+                message: "Username ose password gabim."
+            });
+        }
 
-    if (!passwordCorrect) {
-        return res.status(401).json({
-            success: false,
-            message: "Username ose password gabim."
-        });
-    }
+        const admin = results[0];
 
-    req.session.adminId = admin.id;
-    req.session.adminUsername = admin.username;
-
-    res.json({
-        success: true,
-        message: "Login u krye me sukses!"
-    });
-
-});
-```
-
-});
-
-/* CHECK LOGIN */
-
-app.get("/api/admin/check", (req, res) => {
-
-```
-if (!req.session.adminId) {
-    return res.json({
-        loggedIn: false
-    });
-}
-
-res.json({
-    loggedIn: true,
-    username: req.session.adminUsername
-});
-```
-
-});
-
-/* ADMIN LOGOUT */
-
-app.post("/api/admin/logout", (req, res) => {
-
-```
-req.session.destroy(() => {
-    res.json({
-        success: true,
-        message: "U çkyçe me sukses."
-    });
-});
-```
-
-});
-
-/* TEST */
-
-app.get("/api/test", (req, res) => {
-
-```
-res.json({
-    success: true,
-    message: "Backend + MySQL po punojnë!"
-});
-```
-
-});
-
-/* ADMIN MIDDLEWARE */
-
-function requireAdmin(req, res, next) {
-
-```
-if (!req.session.adminId) {
-    return res.status(401).json({
-        success: false,
-        message: "Duhet të kyçesh si admin."
-    });
-}
-
-next();
-```
-
-}
-
-/* GET ORDERS */
-
-app.get("/api/orders", requireAdmin, (req, res) => {
-
-```
-const sql = `
-    SELECT *
-    FROM orders
-    ORDER BY created_at DESC
-`;
-
-db.query(sql, (err, results) => {
-
-    if (err) {
-        console.error(
-            "Gabim gjatë marrjes së porosive:",
-            err
+        const passwordCorrect = await bcrypt.compare(
+            password,
+            admin.password
         );
 
-        return res.status(500).json({
-            success: false,
-            message: "Gabim me databazën."
+        if (!passwordCorrect) {
+            return res.status(401).json({
+                success: false,
+                message: "Username ose password gabim."
+            });
+        }
+
+        req.session.admin = {
+            id: admin.id,
+            username: admin.username
+        };
+
+        res.json({
+            success: true,
+            message: "Login me sukses!"
+        });
+    });
+});
+
+// Kontrollo login
+app.get("/api/admin/check", (req, res) => {
+    if (!req.session.admin) {
+        return res.status(401).json({
+            loggedIn: false
         });
     }
 
     res.json({
-        success: true,
-        orders: results
+        loggedIn: true,
+        admin: req.session.admin
     });
-
-});
-```
-
 });
 
-/* CREATE ORDER */
+// Logout
+app.post("/api/admin/logout", (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({
+                success: false
+            });
+        }
 
-app.post("/api/orders", (req, res) => {
-
-```
-const {
-    product,
-    quantity,
-    price,
-    text,
-    image,
-    name,
-    phone,
-    address,
-    city
-} = req.body;
-
-if (
-    !product ||
-    !quantity ||
-    !price ||
-    !name ||
-    !phone ||
-    !address ||
-    !city
-) {
-    return res.status(400).json({
-        success: false,
-        message: "Mungojnë disa të dhëna."
+        res.json({
+            success: true
+        });
     });
+});
+
+// =========================
+// ADMIN PROTECTION
+// =========================
+
+function requireAdmin(req, res, next) {
+    if (!req.session.admin) {
+        return res.status(401).json({
+            success: false,
+            message: "Nuk je i kyçur si admin."
+        });
+    }
+
+    next();
 }
 
-const sql = `
-    INSERT INTO orders
-    (
+// =========================
+// TEST
+// =========================
+
+app.get("/api/test", (req, res) => {
+    res.json({
+        success: true,
+        message: "ImprezaPrint backend po punon!"
+    });
+});
+
+// =========================
+// GET ORDERS
+// =========================
+
+app.get("/api/orders", requireAdmin, (req, res) => {
+    const sql = `
+        SELECT *
+        FROM orders
+        ORDER BY created_at DESC
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Gabim orders:", err);
+            return res.status(500).json({
+                success: false,
+                message: "Gabim me databazën."
+            });
+        }
+
+        res.json(results);
+    });
+});
+
+// =========================
+// CREATE ORDER
+// =========================
+
+app.post("/api/orders", (req, res) => {
+    const {
         product,
         quantity,
         price,
@@ -231,124 +182,132 @@ const sql = `
         phone,
         address,
         city
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-`;
+    } = req.body;
 
-const values = [
-    product,
-    quantity,
-    price,
-    text || "",
-    image || "",
-    name,
-    phone,
-    address,
-    city
-];
-
-db.query(sql, values, (err, result) => {
-
-    if (err) {
-        console.error(
-            "Gabim gjatë ruajtjes së porosisë:",
-            err
-        );
-
-        return res.status(500).json({
+    if (
+        !product ||
+        !quantity ||
+        price === undefined ||
+        !name ||
+        !phone ||
+        !address ||
+        !city
+    ) {
+        return res.status(400).json({
             success: false,
-            message: "Porosia nuk u ruajt."
+            message: "Plotëso të gjitha fushat e nevojshme."
         });
     }
 
-    res.json({
-        success: true,
-        message: "Porosia u ruajt me sukses!",
-        orderId: result.insertId
-    });
+    const sql = `
+        INSERT INTO orders
+        (
+            product,
+            quantity,
+            price,
+            text,
+            image,
+            name,
+            phone,
+            address,
+            city
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
+    db.query(
+        sql,
+        [
+            product,
+            quantity,
+            price,
+            text || "",
+            image || "",
+            name,
+            phone,
+            address,
+            city
+        ],
+        (err, result) => {
+            if (err) {
+                console.error("Gabim krijimi i porosisë:", err);
+
+                return res.status(500).json({
+                    success: false,
+                    message: "Porosia nuk u ruajt."
+                });
+            }
+
+            res.json({
+                success: true,
+                message: "Porosia u ruajt me sukses!",
+                orderId: result.insertId
+            });
+        }
+    );
 });
-```
 
-});
-
-/* UPDATE ORDER STATUS */
+// =========================
+// UPDATE ORDER STATUS
+// =========================
 
 app.put("/api/orders/:id/status", requireAdmin, (req, res) => {
+    const orderId = req.params.id;
+    const { status } = req.body;
 
-```
-const id = req.params.id;
-const { status } = req.body;
+    const allowedStatuses = [
+        "E re",
+        "Në përpunim",
+        "Gati",
+        "Dërguar",
+        "Përfunduar"
+    ];
 
-const allowedStatuses = [
-    "E re",
-    "Në përpunim",
-    "Gati",
-    "Dërguar",
-    "Përfunduar"
-];
-
-if (!allowedStatuses.includes(status)) {
-    return res.status(400).json({
-        success: false,
-        message: "Status i pavlefshëm."
-    });
-}
-
-const sql = `
-    UPDATE orders
-    SET status = ?
-    WHERE id = ?
-`;
-
-db.query(sql, [status, id], (err, result) => {
-
-    if (err) {
-        console.error(
-            "Gabim gjatë ndryshimit të statusit:",
-            err
-        );
-
-        return res.status(500).json({
+    if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
             success: false,
-            message: "Statusi nuk u ndryshua."
+            message: "Status i pavlefshëm."
         });
     }
 
-    if (result.affectedRows === 0) {
-        return res.status(404).json({
-            success: false,
-            message: "Porosia nuk u gjet."
+    const sql = `
+        UPDATE orders
+        SET status = ?
+        WHERE id = ?
+    `;
+
+    db.query(sql, [status, orderId], (err, result) => {
+        if (err) {
+            console.error("Gabim statusi:", err);
+
+            return res.status(500).json({
+                success: false,
+                message: "Statusi nuk u ndryshua."
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Statusi u ndryshua."
         });
-    }
-
-    res.json({
-        success: true,
-        message: "Statusi u ndryshua me sukses."
     });
-
-});
-```
-
 });
 
-/* DELETE ORDER */
+// =========================
+// DELETE ORDER
+// =========================
 
 app.delete("/api/orders/:id", requireAdmin, (req, res) => {
+    const orderId = req.params.id;
 
-```
-const id = req.params.id;
+    const sql = `
+        DELETE FROM orders
+        WHERE id = ?
+    `;
 
-db.query(
-    "DELETE FROM orders WHERE id = ?",
-    [id],
-    (err, result) => {
-
+    db.query(sql, [orderId], (err, result) => {
         if (err) {
-            console.error(
-                "Gabim gjatë fshirjes:",
-                err
-            );
+            console.error("Gabim fshirjeje:", err);
 
             return res.status(500).json({
                 success: false,
@@ -356,36 +315,18 @@ db.query(
             });
         }
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Porosia nuk u gjet."
-            });
-        }
-
         res.json({
             success: true,
             message: "Porosia u fshi."
         });
-
-    }
-);
-```
-
+    });
 });
 
-/* START SERVER */
+// =========================
+// START SERVER
+// =========================
 
 app.listen(PORT, () => {
-
-```
-console.log(
-    `🚀 ImprezaPrint po punon në portin ${PORT}`
-);
-
-console.log(
-    "🔐 Admin Login aktiv!"
-);
-```
-
+    console.log(`🚀 ImprezaPrint po punon në portin ${PORT}`);
+    console.log("🔐 Admin Login aktiv!");
 });
