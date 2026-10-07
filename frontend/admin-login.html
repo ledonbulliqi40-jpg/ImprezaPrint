@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html lang="sq">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Login - ImprezaPrint</title>
+
+<style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        min-height: 100vh;
+        background: #111;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 420px;
+        background: white;
+        padding: 40px;
+        border-radius: 18px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .logo {
+        text-align: center;
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .logo span {
+        color: #e00000;
+    }
+
+    .title {
+        text-align: center;
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #777;
+        margin-bottom: 30px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+    }
+
+    input {
+        width: 100%;
+        padding: 13px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-bottom: 18px;
+        outline: none;
+    }
+
+    input:focus {
+        border-color: #111;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        background: #111;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #333;
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    #message {
+        margin-top: 15px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .error {
+        color: #d00000;
+    }
+
+    .success {
+        color: #008000;
+    }
+
+</style>
+```
+
+</head>
+
+<body>
+
+```
+<div class="login-box">
+
+    <div class="logo">
+        Impreza<span>Print</span>
+    </div>
+
+    <div class="title">
+        Admin Login
+    </div>
+
+    <div class="subtitle">
+        Hyr në panelin e administrimit
+    </div>
+
+    <form id="loginForm">
+
+        <label for="username">
+            Username
+        </label>
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Shkruaj username"
+            autocomplete="username"
+            required
+        >
+
+        <label for="password">
+            Password
+        </label>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Shkruaj password"
+            autocomplete="current-password"
+            required
+        >
+
+        <button
+            type="submit"
+            id="loginButton"
+        >
+            Hyr në Admin
+        </button>
+
+    </form>
+
+    <div id="message"></div>
+
+</div>
+
+
+<script>
+
+    const form = document.getElementById("loginForm");
+
+    const message = document.getElementById("message");
+
+    const button = document.getElementById("loginButton");
+
+
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+
+        const username =
+            document.getElementById("username").value.trim();
+
+        const password =
+            document.getElementById("password").value;
+
+
+        message.textContent = "";
+
+        message.className = "";
+
+
+        button.disabled = true;
+
+        button.textContent = "Duke u kyçur...";
+
+
+        try {
+
+            const response = await fetch(
+                "http://localhost:3000/api/admin/login",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    credentials: "include",
+
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Username ose password gabim."
+                );
+
+            }
+
+
+            message.textContent =
+                "✅ Login u krye me sukses!";
+
+            message.className = "success";
+
+
+            button.textContent =
+                "Duke hapur Admin...";
+
+
+            setTimeout(function() {
+
+                window.location.replace(
+                    "http://localhost:3000/admin.html"
+                );
+
+            }, 1000);
+
+
+        } catch (error) {
+
+            console.error(
+                "Gabim gjatë login:",
+                error
+            );
+
+
+            message.textContent =
+                "❌ " + error.message;
+
+            message.className = "error";
+
+
+            button.disabled = false;
+
+            button.textContent =
+                "Hyr në Admin";
+
+        }
+
+    });
+
+</script>
+```
+
+</body>
+
+</html>

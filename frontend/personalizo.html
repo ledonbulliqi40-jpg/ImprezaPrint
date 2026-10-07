@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="sq">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Personalizo | ImprezaPrint</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        Impreza<span>Print</span>
+    </div>
+
+    <nav>
+        <a href="index.html">Ballina</a>
+        <a href="index.html#products">Produktet</a>
+        <a href="personalizo.html">Personalizo</a>
+        <a href="#">Kontakt</a>
+    </nav>
+
+</header>
+
+
+<section class="customize">
+
+    <div class="customize-container">
+
+        <div class="customize-info">
+
+            <h1>Personalizo produktin</h1>
+
+            <p>
+                Ngarko foton tënde dhe krijo një produkt unik.
+            </p>
+
+
+            <form id="customForm">
+
+                <label for="product">
+                    Produkti
+                </label>
+
+                <select id="product" required>
+
+                    <option value="Case" data-price="10">
+                        Case - €10
+                    </option>
+
+                    <option value="Maicë" data-price="15">
+                        Maicë - €15
+                    </option>
+
+                    <option value="Varëse" data-price="4">
+                        Varëse - €4
+                    </option>
+
+                </select>
+
+
+                <label for="photo">
+                    Ngarko foton
+                </label>
+
+                <input
+                    type="file"
+                    id="photo"
+                    accept="image/*"
+                    required
+                >
+
+
+                <label for="text">
+                    Emri / Teksti
+                </label>
+
+                <input
+                    type="text"
+                    id="text"
+                    placeholder="P.sh. Ledon"
+                >
+
+
+                <label for="quantity">
+                    Sasia
+                </label>
+
+                <input
+                    type="number"
+                    id="quantity"
+                    value="1"
+                    min="1"
+                    max="20"
+                    required
+                >
+
+
+                <div class="total">
+                    Totali:
+                    <strong id="total">€10</strong>
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="btn"
+                >
+                    Shto në shportë
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <div class="preview">
+
+            <h2>Paraqitja</h2>
+
+            <div class="preview-box">
+
+                <img
+                    id="previewImage"
+                    src=""
+                    alt="Foto e produktit"
+                >
+
+                <span id="previewText">
+                    Fotoja jote
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer>
+
+    © 2026 ImprezaPrint — Të gjitha të drejtat e rezervuara.
+
+</footer>
+
+
+<script>
+
+const product =
+    document.getElementById("product");
+
+const quantity =
+    document.getElementById("quantity");
+
+const total =
+    document.getElementById("total");
+
+const photo =
+    document.getElementById("photo");
+
+const previewImage =
+    document.getElementById("previewImage");
+
+const previewText =
+    document.getElementById("previewText");
+
+const textInput =
+    document.getElementById("text");
+
+const form =
+    document.getElementById("customForm");
+
+
+// ==========================
+// LLOGARITJA E ÇMIMIT
+// ==========================
+
+function updateTotal() {
+
+    const selected =
+        product.options[product.selectedIndex];
+
+    const price =
+        Number(selected.dataset.price);
+
+    const qty =
+        Number(quantity.value);
+
+    total.textContent =
+        "€" + (price * qty).toFixed(2);
+}
+
+
+product.addEventListener(
+    "change",
+    updateTotal
+);
+
+quantity.addEventListener(
+    "input",
+    updateTotal
+);
+
+
+// ==========================
+// SHFAQ FOTON
+// ==========================
+
+photo.addEventListener(
+    "change",
+    function() {
+
+        const file =
+            this.files[0];
+
+        if (!file) {
+
+            previewImage.style.display =
+                "none";
+
+            return;
+        }
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function(event) {
+
+                previewImage.src =
+                    event.target.result;
+
+                previewImage.style.display =
+                    "block";
+
+            };
+
+
+        reader.readAsDataURL(file);
+
+    }
+);
+
+
+// ==========================
+// SHFAQ TEKSTIN
+// ==========================
+
+textInput.addEventListener(
+    "input",
+    function() {
+
+        if (this.value.trim() === "") {
+
+            previewText.textContent =
+                "Fotoja jote";
+
+        } else {
+
+            previewText.textContent =
+                this.value;
+
+        }
+
+    }
+);
+
+
+// ==========================
+// SHTO NË SHPORTË
+// ==========================
+
+form.addEventListener(
+    "submit",
+    function(event) {
+
+        event.preventDefault();
+
+
+        const selected =
+            product.options[
+                product.selectedIndex
+            ];
+
+
+        const item = {
+
+            product:
+                product.value,
+
+            price:
+                Number(
+                    selected.dataset.price
+                ),
+
+            quantity:
+                Number(
+                    quantity.value
+                ),
+
+            text:
+                textInput.value,
+
+            image:
+                previewImage.src
+
+        };
+
+
+        localStorage.setItem(
+            "imprezaCart",
+            JSON.stringify(item)
+        );
+
+
+        // Shko direkt te Checkout
+
+        window.location.href =
+            "checkout.html";
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>

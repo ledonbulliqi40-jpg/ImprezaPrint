@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="sq">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Përfundo Porosinë | ImprezaPrint</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="logo">
+        Impreza<span>Print</span>
+    </div>
+
+    <nav>
+
+        <a href="index.html">
+            Ballina
+        </a>
+
+        <a href="index.html#products">
+            Produktet
+        </a>
+
+        <a href="personalizo.html">
+            Personalizo
+        </a>
+
+    </nav>
+
+</header>
+
+
+
+<section class="customize">
+
+    <div class="customize-container">
+
+
+        <div class="customize-info">
+
+            <h1>
+                Përfundo Porosinë 📦
+            </h1>
+
+            <p>
+                Plotëso të dhënat për të dërguar porosinë.
+            </p>
+
+
+            <div class="total">
+
+                <div>
+                    Produkti:
+                    <strong id="orderProduct">
+                        -
+                    </strong>
+                </div>
+
+                <br>
+
+                <div>
+                    Sasia:
+                    <strong id="orderQuantity">
+                        -
+                    </strong>
+                </div>
+
+                <br>
+
+                <div>
+                    Totali:
+                    <strong id="orderTotal">
+                        -
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <form id="orderForm">
+
+
+                <label for="name">
+                    Emër dhe Mbiemër
+                </label>
+
+                <input
+                    type="text"
+                    id="name"
+                    placeholder="P.sh. Ledon Bulliqi"
+                    required
+                >
+
+
+                <label for="phone">
+                    Numri i telefonit
+                </label>
+
+                <input
+                    type="tel"
+                    id="phone"
+                    placeholder="P.sh. 044 123 456"
+                    required
+                >
+
+
+                <label for="address">
+                    Adresa
+                </label>
+
+                <input
+                    type="text"
+                    id="address"
+                    placeholder="Rruga dhe numri"
+                    required
+                >
+
+
+                <label for="city">
+                    Qyteti
+                </label>
+
+                <input
+                    type="text"
+                    id="city"
+                    placeholder="P.sh. Prishtinë"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    class="btn"
+                    id="submitButton"
+                >
+                    Dërgo Porosinë
+                </button>
+
+
+            </form>
+
+
+            <div
+                id="success"
+                style="display:none; margin-top:25px;"
+            >
+
+                <h2>
+                    ✅ Porosia u dërgua!
+                </h2>
+
+                <p>
+                    Faleminderit për porosinë.
+                    Porosia është regjistruar me sukses.
+                </p>
+
+            </div>
+
+
+            <div
+                id="error"
+                style="display:none; margin-top:25px; color:#e63946;"
+            >
+
+                <h3>
+                    ❌ Gabim
+                </h3>
+
+                <p id="errorMessage">
+                    Porosia nuk u dërgua.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="preview">
+
+            <h2>
+                Produkti yt
+            </h2>
+
+
+            <div class="preview-box">
+
+                <img
+                    id="orderImage"
+                    src=""
+                    alt="Produkti"
+                    style="display:none;"
+                >
+
+                <span id="orderText">
+                    -
+                </span>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<footer>
+
+    © 2026 ImprezaPrint —
+    Të gjitha të drejtat e rezervuara.
+
+</footer>
+
+
+
+<script>
+
+
+// Merr produktin nga localStorage
+
+const cart =
+    JSON.parse(
+        localStorage.getItem("imprezaCart")
+    );
+
+
+// Elementet e faqes
+
+const orderProduct =
+    document.getElementById("orderProduct");
+
+const orderQuantity =
+    document.getElementById("orderQuantity");
+
+const orderTotal =
+    document.getElementById("orderTotal");
+
+const orderImage =
+    document.getElementById("orderImage");
+
+const orderText =
+    document.getElementById("orderText");
+
+const orderForm =
+    document.getElementById("orderForm");
+
+const success =
+    document.getElementById("success");
+
+const error =
+    document.getElementById("error");
+
+const errorMessage =
+    document.getElementById("errorMessage");
+
+const submitButton =
+    document.getElementById("submitButton");
+
+
+// Kontrollo nëse ekziston produkti
+
+if (!cart) {
+
+    orderProduct.textContent =
+        "Nuk ka produkt";
+
+    orderQuantity.textContent =
+        "-";
+
+    orderTotal.textContent =
+        "€0.00";
+
+} else {
+
+
+    orderProduct.textContent =
+        cart.product;
+
+
+    orderQuantity.textContent =
+        cart.quantity;
+
+
+    const total =
+        Number(cart.price) *
+        Number(cart.quantity);
+
+
+    orderTotal.textContent =
+        "€" + total.toFixed(2);
+
+
+    // Shfaq fotografinë
+
+    if (cart.image) {
+
+        orderImage.src =
+            cart.image;
+
+        orderImage.style.display =
+            "block";
+
+    }
+
+
+    // Shfaq tekstin
+
+    if (cart.text) {
+
+        orderText.textContent =
+            cart.text;
+
+    }
+
+}
+
+
+
+// ==========================
+// DËRGO POROSINË NË BACKEND
+// ==========================
+
+orderForm.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        // Kontrollo produktin
+
+        if (!cart) {
+
+            alert(
+                "Nuk ka produkt për të porositur."
+            );
+
+            return;
+
+        }
+
+
+        // Merr të dhënat
+
+        const name =
+            document.getElementById(
+                "name"
+            ).value.trim();
+
+
+        const phone =
+            document.getElementById(
+                "phone"
+            ).value.trim();
+
+
+        const address =
+            document.getElementById(
+                "address"
+            ).value.trim();
+
+
+        const city =
+            document.getElementById(
+                "city"
+            ).value.trim();
+
+
+        // Çaktivizo butonin
+
+        submitButton.disabled =
+            true;
+
+        submitButton.textContent =
+            "Duke dërguar...";
+
+
+        try {
+
+
+            // Dërgo te Node.js
+
+            const response =
+                await fetch(
+                    "/api/orders",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                product:
+                                    cart.product,
+
+                                quantity:
+                                    cart.quantity,
+
+                                price:
+                                    Number(cart.price) *
+                                    Number(cart.quantity),
+
+                                text:
+                                    cart.text || "",
+
+                                image:
+                                    cart.image || "",
+
+                                name:
+                                    name,
+
+                                phone:
+                                    phone,
+
+                                address:
+                                    address,
+
+                                city:
+                                    city
+
+                            })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            // Nëse ka error
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    "Porosia nuk u ruajt."
+                );
+
+            }
+
+
+            // Sukses
+
+            orderForm.style.display =
+                "none";
+
+
+            success.style.display =
+                "block";
+
+
+            // Fshij shportën
+
+            localStorage.removeItem(
+                "imprezaCart"
+            );
+
+
+            console.log(
+                "Porosia u ruajt. ID:",
+                data.orderId
+            );
+
+
+        } catch (err) {
+
+
+            console.error(err);
+
+
+            errorMessage.textContent =
+                err.message ||
+                "Ndodhi një gabim.";
+
+
+            error.style.display =
+                "block";
+
+
+            submitButton.disabled =
+                false;
+
+
+            submitButton.textContent =
+                "Dërgo Porosinë";
+
+        }
+
+    }
+);
+
+
+</script>
+
+
+</body>
+
+</html>
