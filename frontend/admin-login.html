@@ -4,7 +4,6 @@
 
 <head>
 
-```
 <meta charset="UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -117,66 +116,65 @@
     }
 
 </style>
-```
 
 </head>
 
 <body>
 
-```
 <div class="login-box">
 
-    <div class="logo">
-        Impreza<span>Print</span>
-    </div>
-
-    <div class="title">
-        Admin Login
-    </div>
-
-    <div class="subtitle">
-        Hyr në panelin e administrimit
-    </div>
-
-    <form id="loginForm">
-
-        <label for="username">
-            Username
-        </label>
-
-        <input
-            type="text"
-            id="username"
-            placeholder="Shkruaj username"
-            autocomplete="username"
-            required
-        >
-
-        <label for="password">
-            Password
-        </label>
-
-        <input
-            type="password"
-            id="password"
-            placeholder="Shkruaj password"
-            autocomplete="current-password"
-            required
-        >
-
-        <button
-            type="submit"
-            id="loginButton"
-        >
-            Hyr në Admin
-        </button>
-
-    </form>
-
-    <div id="message"></div>
-
+```
+<div class="logo">
+    Impreza<span>Print</span>
 </div>
 
+<div class="title">
+    Admin Login
+</div>
+
+<div class="subtitle">
+    Hyr në panelin e administrimit
+</div>
+
+<form id="loginForm">
+
+    <label for="username">
+        Username
+    </label>
+
+    <input
+        type="text"
+        id="username"
+        placeholder="Shkruaj username"
+        autocomplete="username"
+        required
+    >
+
+    <label for="password">
+        Password
+    </label>
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Shkruaj password"
+        autocomplete="current-password"
+        required
+    >
+
+    <button
+        type="submit"
+        id="loginButton"
+    >
+        Hyr në Admin
+    </button>
+
+</form>
+
+<div id="message"></div>
+```
+
+</div>
 
 <script>
 
@@ -212,7 +210,7 @@
         try {
 
             const response = await fetch(
-                "http://localhost:3000/api/admin/login",
+                "/api/admin/login",
                 {
                     method: "POST",
 
@@ -256,7 +254,7 @@
             setTimeout(function() {
 
                 window.location.replace(
-                    "http://localhost:3000/admin.html"
+                    "/admin.html"
                 );
 
             }, 1000);
@@ -286,7 +284,6 @@
     });
 
 </script>
-```
 
 </body>
 
