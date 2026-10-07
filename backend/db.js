@@ -11,7 +11,7 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
     if (err) {
-        console.error("Gabim me MySQL:", err.message);
+        console.error("Gabim me MySQL:", err);
         return;
     }
 
