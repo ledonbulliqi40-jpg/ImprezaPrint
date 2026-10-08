@@ -1,7 +1,6 @@
 <script>
 
-const API_URL =
-    "https://imprezaprint-production.up.railway.app";
+const API_URL = "https://imprezaprint-production.up.railway.app";
 
 
 // ===============================
@@ -10,56 +9,41 @@ const API_URL =
 
 function checkAdmin() {
 
-    const adminData =
-        sessionStorage.getItem("imprezaAdmin");
+    const adminData = sessionStorage.getItem("imprezaAdmin");
 
     if (!adminData) {
-
-        window.location.replace(
-            "/admin-login.html"
-        );
-
+        window.location.replace("/admin-login.html");
         return false;
     }
 
     try {
 
-        const admin =
-            JSON.parse(adminData);
+        const admin = JSON.parse(adminData);
 
-        if (
-            !admin ||
-            admin.username !== "admin"
-        ) {
+        if (!admin || admin.username !== "admin") {
 
-            sessionStorage.removeItem(
-                "imprezaAdmin"
-            );
+            sessionStorage.removeItem("imprezaAdmin");
 
-            window.location.replace(
-                "/admin-login.html"
-            );
+            window.location.replace("/admin-login.html");
 
             return false;
         }
 
-        document.getElementById(
-            "adminName"
-        ).textContent = admin.username;
+        const adminName = document.getElementById("adminName");
+
+        if (adminName) {
+            adminName.textContent = admin.username;
+        }
 
         return true;
 
     } catch (error) {
 
-        console.error(error);
+        console.error("Admin session error:", error);
 
-        sessionStorage.removeItem(
-            "imprezaAdmin"
-        );
+        sessionStorage.removeItem("imprezaAdmin");
 
-        window.location.replace(
-            "/admin-login.html"
-        );
+        window.location.replace("/admin-login.html");
 
         return false;
     }
@@ -72,13 +56,17 @@ function checkAdmin() {
 
 async function loadOrders() {
 
-    const ordersContainer =
-        document.getElementById("orders");
+    const ordersContainer = document.getElementById("orders");
+    const errorBox = document.getElementById("errorBox");
 
-    const errorBox =
-        document.getElementById("errorBox");
+    if (!ordersContainer) {
+        console.error("Elementi #orders nuk u gjet.");
+        return;
+    }
 
-    errorBox.style.display = "none";
+    if (errorBox) {
+        errorBox.style.display = "none";
+    }
 
     ordersContainer.innerHTML = `
         <div class="empty">
@@ -88,52 +76,38 @@ async function loadOrders() {
 
     try {
 
-        const response =
-            await fetch(
-                API_URL + "/api/orders",
-                {
-                    method: "GET",
-                    cache: "no-store"
-                }
-            );
+        const response = await fetch(
+            API_URL + "/api/orders",
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
 
-        const raw =
-            await response.text();
+        const raw = await response.text();
 
         let data;
 
         try {
             data = JSON.parse(raw);
         } catch {
-            throw new Error(
-                "Serveri ktheu përgjigje jo-JSON."
-            );
+            throw new Error("Serveri ktheu përgjigje jo-JSON.");
         }
 
         if (!response.ok) {
-
             throw new Error(
                 data.message ||
                 "Gabim gjatë marrjes së porosive."
             );
         }
 
-        const orders =
-            Array.isArray(data)
-                ? data
-                : data.orders || [];
-
-        console.log(
-            "Porositë:",
-            orders
-        );
+        const orders = Array.isArray(data)
+            ? data
+            : data.orders || [];
 
         updateStats(orders);
 
-        if (
-            !Array.isArray(orders) ||
-            orders.length === 0
-        ) {
+        if (orders.length === 0) {
 
             ordersContainer.innerHTML = `
                 <div class="empty">
@@ -148,34 +122,31 @@ async function loadOrders() {
 
         orders.forEach(order => {
 
-            const orderElement =
-                document.createElement("div");
+            const orderElement = document.createElement("div");
 
-            orderElement.className =
-                "order";
+            orderElement.className = "order";
 
-            const image =
-                order.image
-                    ? `
-                        <img
-                            class="order-image"
-                            src="${order.image}"
-                            alt="Foto e porosisë"
-                        >
-                      `
-                    : `
-                        <div
-                            class="order-image"
-                            style="
-                                display:flex;
-                                align-items:center;
-                                justify-content:center;
-                                color:#999;
-                            "
-                        >
-                            Pa foto
-                        </div>
-                      `;
+            const image = order.image
+                ? `
+                    <img
+                        class="order-image"
+                        src="${escapeHtml(order.image)}"
+                        alt="Foto e porosisë"
+                    >
+                `
+                : `
+                    <div
+                        class="order-image"
+                        style="
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            color:#999;
+                        "
+                    >
+                        Pa foto
+                    </div>
+                `;
 
             orderElement.innerHTML = `
 
@@ -186,20 +157,16 @@ async function loadOrders() {
                     </div>
 
                     <div class="order-date">
-                        ${formatDate(
-                            order.created_at
-                        )}
+                        ${formatDate(order.created_at)}
                     </div>
 
                 </div>
-
 
                 <div class="order-content">
 
                     <div>
                         ${image}
                     </div>
-
 
                     <div>
 
@@ -208,23 +175,16 @@ async function loadOrders() {
                             <div class="detail">
                                 <strong>Produkti</strong>
                                 <span>
-                                    ${escapeHtml(
-                                        order.product
-                                    )}
+                                    ${escapeHtml(order.product)}
                                 </span>
                             </div>
-
 
                             <div class="detail">
                                 <strong>Modeli</strong>
                                 <span>
-                                    ${escapeHtml(
-                                        order.phoneModel ||
-                                        "-"
-                                    )}
+                                    ${escapeHtml(order.phoneModel || "-")}
                                 </span>
                             </div>
-
 
                             <div class="detail">
                                 <strong>Sasia</strong>
@@ -233,68 +193,49 @@ async function loadOrders() {
                                 </span>
                             </div>
 
-
                             <div class="detail">
                                 <strong>Emri</strong>
                                 <span>
-                                    ${escapeHtml(
-                                        order.name
-                                    )}
+                                    ${escapeHtml(order.name)}
                                 </span>
                             </div>
-
 
                             <div class="detail">
                                 <strong>Telefoni</strong>
                                 <span>
-                                    ${escapeHtml(
-                                        order.phone
-                                    )}
+                                    ${escapeHtml(order.phone)}
                                 </span>
                             </div>
-
 
                             <div class="detail">
                                 <strong>Adresa</strong>
                                 <span>
-                                    ${escapeHtml(
-                                        order.address
-                                    )}
+                                    ${escapeHtml(order.address)}
                                 </span>
                             </div>
-
 
                             <div class="detail">
                                 <strong>Qyteti</strong>
                                 <span>
-                                    ${escapeHtml(
-                                        order.city
-                                    )}
+                                    ${escapeHtml(order.city)}
                                 </span>
                             </div>
-
 
                             <div class="detail">
                                 <strong>Pagesa</strong>
                                 <span>
                                     ${escapeHtml(
-                                        order.paymentMethod ||
-                                        "-"
+                                        order.paymentMethod || "-"
                                     )}
                                 </span>
                             </div>
-
 
                             <div class="detail">
                                 <strong>Teksti</strong>
                                 <span>
-                                    ${escapeHtml(
-                                        order.text ||
-                                        "-"
-                                    )}
+                                    ${escapeHtml(order.text || "-")}
                                 </span>
                             </div>
-
 
                             <div class="detail">
                                 <strong>Totali</strong>
@@ -309,7 +250,6 @@ async function loadOrders() {
 
                         </div>
 
-
                         <div class="actions">
 
                             <select
@@ -323,77 +263,55 @@ async function loadOrders() {
 
                                 <option
                                     value="E re"
-                                    ${
-                                        order.status ===
-                                        "E re"
-                                            ? "selected"
-                                            : ""
-                                    }
+                                    ${order.status === "E re"
+                                        ? "selected"
+                                        : ""}
                                 >
                                     E re
                                 </option>
 
-
                                 <option
                                     value="Në përpunim"
-                                    ${
-                                        order.status ===
-                                        "Në përpunim"
-                                            ? "selected"
-                                            : ""
-                                    }
+                                    ${order.status === "Në përpunim"
+                                        ? "selected"
+                                        : ""}
                                 >
                                     Në përpunim
                                 </option>
 
-
                                 <option
                                     value="Gati"
-                                    ${
-                                        order.status ===
-                                        "Gati"
-                                            ? "selected"
-                                            : ""
-                                    }
+                                    ${order.status === "Gati"
+                                        ? "selected"
+                                        : ""}
                                 >
                                     Gati
                                 </option>
 
-
                                 <option
                                     value="Dërguar"
-                                    ${
-                                        order.status ===
-                                        "Dërguar"
-                                            ? "selected"
-                                            : ""
-                                    }
+                                    ${order.status === "Dërguar"
+                                        ? "selected"
+                                        : ""}
                                 >
                                     Dërguar
                                 </option>
 
-
                                 <option
                                     value="Përfunduar"
-                                    ${
-                                        order.status ===
-                                        "Përfunduar"
-                                            ? "selected"
-                                            : ""
-                                    }
+                                    ${order.status === "Përfunduar"
+                                        ? "selected"
+                                        : ""}
                                 >
                                     Përfunduar
                                 </option>
 
                             </select>
 
-
                             <button
                                 class="delete"
                                 onclick="
-                                    deleteOrder(
-                                        ${order.id}
-                                    )
+                                    deleteOrder(${order.id})
                                 "
                             >
                                 Fshi
@@ -406,26 +324,23 @@ async function loadOrders() {
                 </div>
             `;
 
-            ordersContainer.appendChild(
-                orderElement
-            );
+            ordersContainer.appendChild(orderElement);
 
         });
 
     } catch (error) {
 
-        console.error(
-            "Gabim orders:",
-            error
-        );
+        console.error("Gabim orders:", error);
 
         ordersContainer.innerHTML = "";
 
-        errorBox.textContent =
-            "Nuk mund të ngarkohen porositë.";
+        if (errorBox) {
 
-        errorBox.style.display =
-            "block";
+            errorBox.textContent =
+                "Nuk mund të ngarkohen porositë.";
+
+            errorBox.style.display = "block";
+        }
     }
 }
 
@@ -436,80 +351,77 @@ async function loadOrders() {
 
 function updateStats(orders) {
 
-    const total =
-        orders.length;
+    const total = orders.length;
 
+    const newOrders = orders.filter(
+        order => order.status === "E re"
+    ).length;
 
-    const newOrders =
-        orders.filter(
-            order =>
-                order.status === "E re"
-        ).length;
+    const processing = orders.filter(
+        order => order.status === "Në përpunim"
+    ).length;
 
+    const shipped = orders.filter(
+        order => order.status === "Dërguar"
+    ).length;
 
-    const processing =
-        orders.filter(
-            order =>
-                order.status === "Në përpunim"
-        ).length;
+    const completed = orders.filter(
+        order => order.status === "Përfunduar"
+    ).length;
 
+    const sales = orders.reduce(
+        (sum, order) =>
+            sum +
+            Number(
+                order.total ??
+                order.price ??
+                0
+            ),
+        0
+    );
 
-    const shipped =
-        orders.filter(
-            order =>
-                order.status === "Dërguar"
-        ).length;
+    const totalOrders =
+        document.getElementById("totalOrders");
 
+    const newOrdersElement =
+        document.getElementById("newOrders");
 
-    const completed =
-        orders.filter(
-            order =>
-                order.status === "Përfunduar"
-        ).length;
+    const processingOrders =
+        document.getElementById("processingOrders");
 
+    const shippedOrders =
+        document.getElementById("shippedOrders");
 
-    const sales =
-        orders.reduce(
-            (sum, order) =>
-                sum +
-                Number(
-                    order.total ??
-                    order.price ??
-                    0
-                ),
-            0
-        );
+    const completedOrders =
+        document.getElementById("completedOrders");
 
+    const totalSales =
+        document.getElementById("totalSales");
 
-    document.getElementById(
-        "totalOrders"
-    ).textContent = total;
+    if (totalOrders) {
+        totalOrders.textContent = total;
+    }
 
+    if (newOrdersElement) {
+        newOrdersElement.textContent = newOrders;
+    }
 
-    document.getElementById(
-        "newOrders"
-    ).textContent = newOrders;
+    if (processingOrders) {
+        processingOrders.textContent = processing;
+    }
 
+    if (shippedOrders) {
+        shippedOrders.textContent = shipped;
+    }
 
-    document.getElementById(
-        "processingOrders"
-    ).textContent = processing;
+    if (completedOrders) {
+        completedOrders.textContent = completed;
+    }
 
-
-    document.getElementById(
-        "shippedOrders"
-    ).textContent = shipped;
-
-
-    document.getElementById(
-        "completedOrders"
-    ).textContent = completed;
-
-
-    document.getElementById(
-        "totalSales"
-    ).textContent =
-        "€" + sales.toFixed(2);
+    if (totalSales) {
+        totalSales.textContent =
+            "€" + sales.toFixed(2);
+    }
 }
 
 
@@ -517,41 +429,33 @@ function updateStats(orders) {
 // CHANGE STATUS
 // ===============================
 
-async function changeStatus(
-    orderId,
-    status
-) {
+async function changeStatus(orderId, status) {
 
     try {
 
-        const response =
-            await fetch(
-                API_URL +
-                `/api/orders/${orderId}/status`,
-                {
-                    method: "PUT",
+        const response = await fetch(
+            API_URL +
+            `/api/orders/${orderId}/status`,
+            {
+                method: "PUT",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-                    body: JSON.stringify({
-                        status: status
-                    })
-                }
-            );
+                body: JSON.stringify({
+                    status: status
+                })
+            }
+        );
 
-
-        const raw =
-            await response.text();
+        const raw = await response.text();
 
         let data = {};
 
         try {
             data = JSON.parse(raw);
         } catch {}
-
 
         if (!response.ok) {
 
@@ -560,7 +464,6 @@ async function changeStatus(
                 "Statusi nuk u ndryshua."
             );
         }
-
 
         await loadOrders();
 
@@ -580,42 +483,33 @@ async function changeStatus(
 // DELETE ORDER
 // ===============================
 
-async function deleteOrder(
-    orderId
-) {
+async function deleteOrder(orderId) {
 
-    const confirmDelete =
-        confirm(
-            "A je i sigurt që dëshiron ta fshish këtë porosi?"
-        );
-
+    const confirmDelete = confirm(
+        "A je i sigurt që dëshiron ta fshish këtë porosi?"
+    );
 
     if (!confirmDelete) {
         return;
     }
 
-
     try {
 
-        const response =
-            await fetch(
-                API_URL +
-                `/api/orders/${orderId}`,
-                {
-                    method: "DELETE"
-                }
-            );
+        const response = await fetch(
+            API_URL +
+            `/api/orders/${orderId}`,
+            {
+                method: "DELETE"
+            }
+        );
 
-
-        const raw =
-            await response.text();
+        const raw = await response.text();
 
         let data = {};
 
         try {
             data = JSON.parse(raw);
         } catch {}
-
 
         if (!response.ok) {
 
@@ -624,7 +518,6 @@ async function deleteOrder(
                 "Porosia nuk u fshi."
             );
         }
-
 
         await loadOrders();
 
@@ -646,9 +539,7 @@ async function deleteOrder(
 
 function logout() {
 
-    sessionStorage.removeItem(
-        "imprezaAdmin"
-    );
+    sessionStorage.removeItem("imprezaAdmin");
 
     window.location.replace(
         "/admin-login.html"
@@ -693,26 +584,11 @@ function escapeHtml(value) {
     }
 
     return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
