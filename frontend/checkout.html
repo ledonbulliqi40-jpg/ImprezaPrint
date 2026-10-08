@@ -1,100 +1,343 @@
 <!DOCTYPE html>
 <html lang="sq">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <title>ImprezaPrint | Përfundo Porosinë</title>
 
-    <title>Përfundo Porosinë | ImprezaPrint</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <link rel="stylesheet" href="style.css">
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            color: #111;
+        }
 
+        header {
+            width: 100%;
+            background: #fff;
+            padding: 16px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo img {
+            width: auto;
+            height: 58px;
+            display: block;
+            object-fit: contain;
+        }
+
+        nav {
+            display: flex;
+            gap: 25px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #111;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        nav a:hover {
+            color: #777;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .checkout-box {
+            background: #fff;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.07);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .order-summary {
+            background: #f5f5f5;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 9px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+        }
+
+        .summary-value {
+            text-align: right;
+        }
+
+        .total {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        form {
+            display: grid;
+            gap: 18px;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 7px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            background: #fff;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #111;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #111;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #333;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .success {
+            background: #e9f9ee;
+            color: #147a35;
+        }
+
+        .error {
+            background: #ffeaea;
+            color: #b00020;
+        }
+
+        .product-photo {
+            width: 100%;
+            max-width: 220px;
+            max-height: 220px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .product-section {
+            margin-top: 40px;
+        }
+
+        .product-section h2 {
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+            header {
+                padding: 14px 5%;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .logo img {
+                height: 50px;
+            }
+
+            nav {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            main {
+                margin: 25px auto;
+                padding: 0 12px;
+            }
+
+            .checkout-box {
+                padding: 22px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .summary-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .summary-value {
+                text-align: left;
+            }
+        }
+    </style>
 </head>
-
 
 <body>
 
-
 <header>
 
-    <div class="logo">
-        Impreza<span>Print</span>
-    </div>
+    <a href="index.html" class="logo">
+        <img src="UIHN9939.PNG" alt="ImprezaPrint">
+    </a>
 
     <nav>
-
-        <a href="index.html">
-            Ballina
-        </a>
-
-        <a href="index.html#products">
-            Produktet
-        </a>
-
-        <a href="personalizo.html">
-            Personalizo
-        </a>
-
+        <a href="index.html">Ballina</a>
+        <a href="index.html#products">Produktet</a>
+        <a href="personalizo.html">Personalizo</a>
     </nav>
 
 </header>
 
 
+<main>
 
-<section class="customize">
+    <div class="checkout-box">
 
-    <div class="customize-container">
+        <h1>Përfundo Porosinë 📦</h1>
 
-
-        <div class="customize-info">
-
-            <h1>
-                Përfundo Porosinë 📦
-            </h1>
-
-            <p>
-                Plotëso të dhënat për të dërguar porosinë.
-            </p>
+        <p class="subtitle">
+            Plotëso të dhënat për të dërguar porosinë.
+        </p>
 
 
-            <div class="total">
+        <div id="message" class="message"></div>
 
-                <div>
-                    Produkti:
-                    <strong id="orderProduct">
-                        -
-                    </strong>
-                </div>
 
-                <br>
+        <div class="order-summary">
 
-                <div>
-                    Sasia:
-                    <strong id="orderQuantity">
-                        -
-                    </strong>
-                </div>
-
-                <br>
-
-                <div>
-                    Totali:
-                    <strong id="orderTotal">
-                        -
-                    </strong>
-                </div>
-
+            <div class="summary-row">
+                <span class="summary-label">Produkti</span>
+                <span class="summary-value" id="productName">
+                    Nuk ka produkt
+                </span>
             </div>
 
+            <div class="summary-row">
+                <span class="summary-label">Modeli</span>
+                <span class="summary-value" id="phoneModel">
+                    -
+                </span>
+            </div>
 
-            <form id="orderForm">
+            <div class="summary-row">
+                <span class="summary-label">Sasia</span>
+                <span class="summary-value" id="quantity">
+                    -
+                </span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Çmimi</span>
+                <span class="summary-value" id="price">
+                    €0.00
+                </span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Totali</span>
+                <span class="summary-value total" id="total">
+                    €0.00
+                </span>
+            </div>
+
+            <img
+                id="productPhoto"
+                class="product-photo"
+                alt="Foto e produktit"
+            >
+
+        </div>
 
 
+        <form id="checkoutForm">
+
+            <div>
                 <label for="name">
                     Emër dhe Mbiemër
                 </label>
@@ -102,11 +345,13 @@
                 <input
                     type="text"
                     id="name"
-                    placeholder="P.sh. Ledon Bulliqi"
+                    placeholder="Shkruaj emrin dhe mbiemrin"
                     required
                 >
+            </div>
 
 
+            <div>
                 <label for="phone">
                     Numri i telefonit
                 </label>
@@ -114,11 +359,13 @@
                 <input
                     type="tel"
                     id="phone"
-                    placeholder="P.sh. 044 123 456"
+                    placeholder="+383..."
                     required
                 >
+            </div>
 
 
+            <div>
                 <label for="address">
                     Adresa
                 </label>
@@ -126,11 +373,13 @@
                 <input
                     type="text"
                     id="address"
-                    placeholder="Rruga dhe numri"
+                    placeholder="Shkruaj adresën"
                     required
                 >
+            </div>
 
 
+            <div>
                 <label for="city">
                     Qyteti
                 </label>
@@ -138,385 +387,515 @@
                 <input
                     type="text"
                     id="city"
-                    placeholder="P.sh. Prishtinë"
+                    placeholder="Shkruaj qytetin"
                     required
                 >
-
-
-                <button
-                    type="submit"
-                    class="btn"
-                    id="submitButton"
-                >
-                    Dërgo Porosinë
-                </button>
-
-
-            </form>
-
-
-            <div
-                id="success"
-                style="display:none; margin-top:25px;"
-            >
-
-                <h2>
-                    ✅ Porosia u dërgua!
-                </h2>
-
-                <p>
-                    Faleminderit për porosinë.
-                    Porosia është regjistruar me sukses.
-                </p>
-
             </div>
 
 
-            <div
-                id="error"
-                style="display:none; margin-top:25px; color:#e63946;"
-            >
+            <div>
+                <label for="paymentMethod">
+                    Mënyra e pagesës
+                </label>
 
-                <h3>
-                    ❌ Gabim
-                </h3>
+                <select id="paymentMethod" required>
 
-                <p id="errorMessage">
-                    Porosia nuk u dërgua.
-                </p>
+                    <option value="">
+                        Zgjidh mënyrën e pagesës
+                    </option>
 
+                    <option value="cash_on_delivery">
+                        Pagesë gjatë pranimit
+                    </option>
+
+                </select>
             </div>
 
+
+            <div>
+                <label for="text">
+                    Teksti për personalizim
+                </label>
+
+                <textarea
+                    id="text"
+                    placeholder="Nëse ke tekst për produktin, shkruaje këtu..."
+                ></textarea>
+            </div>
+
+
+            <button
+                type="submit"
+                class="submit-btn"
+                id="submitBtn"
+            >
+                Dërgo Porosinë
+            </button>
+
+        </form>
+
+
+        <div class="product-section">
+
+            <h2>Produkti yt</h2>
+
+            <p id="productDescription">
+                Produkti -
+            </p>
 
         </div>
-
-
-        <div class="preview">
-
-            <h2>
-                Produkti yt
-            </h2>
-
-
-            <div class="preview-box">
-
-                <img
-                    id="orderImage"
-                    src=""
-                    alt="Produkti"
-                    style="display:none;"
-                >
-
-                <span id="orderText">
-                    -
-                </span>
-
-            </div>
-
-        </div>
-
 
     </div>
 
-</section>
-
+</main>
 
 
 <footer>
-
-    © 2026 ImprezaPrint —
-    Të gjitha të drejtat e rezervuara.
-
+    © 2026 ImprezaPrint — Të gjitha të drejtat e rezervuara.
 </footer>
-
 
 
 <script>
 
-
-// Merr produktin nga localStorage
-
-const cart =
-    JSON.parse(
-        localStorage.getItem("imprezaCart")
-    );
+    /*
+        BACKEND-I YNË NË RAILWAY
+    */
+    const API_URL =
+        "https://imprezaprint-production.up.railway.app";
 
 
-// Elementet e faqes
+    /*
+        MERR TË DHËNAT NGA LOCAL STORAGE
+    */
 
-const orderProduct =
-    document.getElementById("orderProduct");
+    let orderData = null;
 
-const orderQuantity =
-    document.getElementById("orderQuantity");
+    try {
 
-const orderTotal =
-    document.getElementById("orderTotal");
+        const savedCart =
+            localStorage.getItem("imprezaCart") ||
+            localStorage.getItem("cart") ||
+            localStorage.getItem("orderData");
 
-const orderImage =
-    document.getElementById("orderImage");
+        if (savedCart) {
+            orderData = JSON.parse(savedCart);
+        }
 
-const orderText =
-    document.getElementById("orderText");
+    } catch (error) {
 
-const orderForm =
-    document.getElementById("orderForm");
+        console.error(
+            "Gabim në leximin e porosisë:",
+            error
+        );
 
-const success =
-    document.getElementById("success");
-
-const error =
-    document.getElementById("error");
-
-const errorMessage =
-    document.getElementById("errorMessage");
-
-const submitButton =
-    document.getElementById("submitButton");
+    }
 
 
-// Kontrollo nëse ekziston produkti
+    /*
+        ELEMENTET
+    */
 
-if (!cart) {
+    const productName =
+        document.getElementById("productName");
 
-    orderProduct.textContent =
-        "Nuk ka produkt";
+    const phoneModel =
+        document.getElementById("phoneModel");
 
-    orderQuantity.textContent =
-        "-";
+    const quantity =
+        document.getElementById("quantity");
 
-    orderTotal.textContent =
-        "€0.00";
-
-} else {
-
-
-    orderProduct.textContent =
-        cart.product;
-
-
-    orderQuantity.textContent =
-        cart.quantity;
-
+    const price =
+        document.getElementById("price");
 
     const total =
-        Number(cart.price) *
-        Number(cart.quantity);
+        document.getElementById("total");
+
+    const productDescription =
+        document.getElementById("productDescription");
+
+    const productPhoto =
+        document.getElementById("productPhoto");
+
+    const checkoutForm =
+        document.getElementById("checkoutForm");
+
+    const submitBtn =
+        document.getElementById("submitBtn");
+
+    const message =
+        document.getElementById("message");
 
 
-    orderTotal.textContent =
-        "€" + total.toFixed(2);
+    /*
+        SHFAQ TË DHËNAT E PRODUKTIT
+    */
+
+    if (orderData) {
+
+        const product =
+            orderData.product || "Case";
+
+        const model =
+            orderData.phoneModel ||
+            orderData.model ||
+            "-";
+
+        const qty =
+            Number(orderData.quantity) || 1;
+
+        const productPrice =
+            Number(orderData.price) || 0;
+
+        const orderTotal =
+            Number(orderData.total) ||
+            productPrice * qty;
 
 
-    // Shfaq fotografinë
+        productName.textContent =
+            product;
 
-    if (cart.image) {
+        phoneModel.textContent =
+            model;
 
-        orderImage.src =
-            cart.image;
+        quantity.textContent =
+            qty;
 
-        orderImage.style.display =
-            "block";
+        price.textContent =
+            "€" +
+            productPrice.toFixed(2);
 
-    }
+        total.textContent =
+            "€" +
+            orderTotal.toFixed(2);
 
-
-    // Shfaq tekstin
-
-    if (cart.text) {
-
-        orderText.textContent =
-            cart.text;
-
-    }
-
-}
+        productDescription.textContent =
+            product;
 
 
+        /*
+            FOTO
+        */
 
-// ==========================
-// DËRGO POROSINË NË BACKEND
-// ==========================
+        if (orderData.image) {
 
-orderForm.addEventListener(
-    "submit",
-    async function(event) {
+            productPhoto.src =
+                orderData.image;
 
-        event.preventDefault();
-
-
-        // Kontrollo produktin
-
-        if (!cart) {
-
-            alert(
-                "Nuk ka produkt për të porositur."
-            );
-
-            return;
-
+            productPhoto.style.display =
+                "block";
         }
 
 
-        // Merr të dhënat
+        /*
+            TEKSTI I PERSONALIZIMIT
+        */
 
-        const name =
-            document.getElementById(
-                "name"
-            ).value.trim();
+        if (orderData.text) {
 
+            document.getElementById("text").value =
+                orderData.text;
+        }
 
-        const phone =
-            document.getElementById(
-                "phone"
-            ).value.trim();
+    } else {
 
+        productName.textContent =
+            "Nuk ka produkt";
 
-        const address =
-            document.getElementById(
-                "address"
-            ).value.trim();
+        productDescription.textContent =
+            "Nuk u gjet produkti.";
 
-
-        const city =
-            document.getElementById(
-                "city"
-            ).value.trim();
+    }
 
 
-        // Çaktivizo butonin
+    /*
+        MESAZH
+    */
 
-        submitButton.disabled =
-            true;
+    function showMessage(
+        text,
+        type
+    ) {
 
-        submitButton.textContent =
-            "Duke dërguar...";
+        message.textContent =
+            text;
+
+        message.className =
+            "message " + type;
+
+        message.style.display =
+            "block";
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
 
 
-        try {
+    /*
+        DËRGO POROSINË
+    */
+
+    checkoutForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
 
 
-            // Dërgo te Node.js
+            if (!orderData) {
 
-            const response =
-                await fetch(
-                    "/api/orders",
-                    {
-
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify({
-
-                                product:
-                                    cart.product,
-
-                                quantity:
-                                    cart.quantity,
-
-                                price:
-                                    Number(cart.price) *
-                                    Number(cart.quantity),
-
-                                text:
-                                    cart.text || "",
-
-                                image:
-                                    cart.image || "",
-
-                                name:
-                                    name,
-
-                                phone:
-                                    phone,
-
-                                address:
-                                    address,
-
-                                city:
-                                    city
-
-                            })
-
-                    }
+                showMessage(
+                    "❌ Nuk u gjetën të dhënat e produktit.",
+                    "error"
                 );
 
-
-            const data =
-                await response.json();
-
-
-            // Nëse ka error
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
-                    "Porosia nuk u ruajt."
-                );
-
+                return;
             }
 
 
-            // Sukses
+            submitBtn.disabled =
+                true;
 
-            orderForm.style.display =
-                "none";
-
-
-            success.style.display =
-                "block";
+            submitBtn.textContent =
+                "Duke dërguar...";
 
 
-            // Fshij shportën
+            const name =
+                document
+                    .getElementById("name")
+                    .value
+                    .trim();
 
-            localStorage.removeItem(
-                "imprezaCart"
-            );
+            const phone =
+                document
+                    .getElementById("phone")
+                    .value
+                    .trim();
+
+            const address =
+                document
+                    .getElementById("address")
+                    .value
+                    .trim();
+
+            const city =
+                document
+                    .getElementById("city")
+                    .value
+                    .trim();
+
+            const paymentMethod =
+                document
+                    .getElementById("paymentMethod")
+                    .value;
+
+            const text =
+                document
+                    .getElementById("text")
+                    .value
+                    .trim();
 
 
-            console.log(
-                "Porosia u ruajt. ID:",
-                data.orderId
-            );
+            const product =
+                orderData.product ||
+                "Case";
+
+            const model =
+                orderData.phoneModel ||
+                orderData.model ||
+                null;
+
+            const qty =
+                Number(orderData.quantity) ||
+                1;
+
+            const productPrice =
+                Number(orderData.price) ||
+                0;
+
+            const orderTotal =
+                Number(orderData.total) ||
+                productPrice * qty;
+
+            const image =
+                orderData.image ||
+                null;
 
 
-        } catch (err) {
+            const order = {
+
+                product: product,
+
+                phoneModel: model,
+
+                quantity: qty,
+
+                price: productPrice,
+
+                total: orderTotal,
+
+                paymentMethod:
+                    paymentMethod,
+
+                text: text,
+
+                image: image,
+
+                name: name,
+
+                phone: phone,
+
+                address: address,
+
+                city: city
+
+            };
 
 
-            console.error(err);
+            try {
+
+                const controller =
+                    new AbortController();
+
+                const timeout =
+                    setTimeout(
+                        () => controller.abort(),
+                        30000
+                    );
 
 
-            errorMessage.textContent =
-                err.message ||
-                "Ndodhi një gabim.";
+                const response =
+                    await fetch(
+                        API_URL + "/api/orders",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(order),
+
+                            signal:
+                                controller.signal
+                        }
+                    );
 
 
-            error.style.display =
-                "block";
+                clearTimeout(timeout);
 
 
-            submitButton.disabled =
-                false;
+                /*
+                    MOS E BËJË JSON PARSING
+                    PA KONTROLLUAR RESPONSE-IN
+                */
+
+                const raw =
+                    await response.text();
+
+                let data;
+
+                try {
+
+                    data =
+                        JSON.parse(raw);
+
+                } catch (jsonError) {
+
+                    console.error(
+                        "Server response:",
+                        raw
+                    );
+
+                    throw new Error(
+                        "Serveri ktheu një përgjigje jo-JSON: " +
+                        raw.substring(0, 150)
+                    );
+                }
 
 
-            submitButton.textContent =
-                "Dërgo Porosinë";
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Gabim gjatë dërgimit të porosisë."
+                    );
+                }
+
+
+                /*
+                    SUKSES
+                */
+
+                showMessage(
+                    "✅ Porosia u dërgua! Faleminderit për porosinë. Porosia është regjistruar me sukses.",
+                    "success"
+                );
+
+
+                checkoutForm.style.display =
+                    "none";
+
+
+                /*
+                    PASTRO CART-IN
+                */
+
+                localStorage.removeItem(
+                    "cart"
+                );
+
+                localStorage.removeItem(
+                    "imprezaCart"
+                );
+
+                localStorage.removeItem(
+                    "orderData"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Gabim:",
+                    error
+                );
+
+
+                if (
+                    error.name ===
+                    "AbortError"
+                ) {
+
+                    showMessage(
+                        "❌ Serveri mori shumë kohë për t'u përgjigjur. Provo përsëri.",
+                        "error"
+                    );
+
+                } else {
+
+                    showMessage(
+                        "❌ " +
+                        error.message,
+                        "error"
+                    );
+                }
+
+
+                submitBtn.disabled =
+                    false;
+
+                submitBtn.textContent =
+                    "Dërgo Porosinë";
+            }
 
         }
-
-    }
-);
-
+    );
 
 </script>
 
-
 </body>
-
 </html>
