@@ -1,463 +1,670 @@
 <script>
 
-const API_URL = "https://imprezaprint-production.up.railway.app";
+"use strict";
+
+const API_URL =
+    "https://imprezaprint-production.up.railway.app";
+
+let allOrders = [];
 
 
-// ===============================
-// CHECK ADMIN LOGIN
-// ===============================
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const adminUsername =
+    document.getElementById("adminUsername");
+
+const ordersBody =
+    document.getElementById("ordersBody");
+
+const errorBox =
+    document.getElementById("errorBox");
+
+const refreshBtn =
+    document.getElementById("refreshBtn");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const totalOrders =
+    document.getElementById("totalOrders");
+
+const newOrders =
+    document.getElementById("newOrders");
+
+const processingOrders =
+    document.getElementById("processingOrders");
+
+const completedOrders =
+    document.getElementById("completedOrders");
+
+const imageModal =
+    document.getElementById("imageModal");
+
+const modalImage =
+    document.getElementById("modalImage");
+
+const closeModal =
+    document.getElementById("closeModal");
+
+
+/* =========================================================
+   CHECK ADMIN
+========================================================= */
 
 function checkAdmin() {
 
-    const adminData = sessionStorage.getItem("imprezaAdmin");
+    const adminData =
+        sessionStorage.getItem("imprezaAdmin");
 
     if (!adminData) {
-        window.location.replace("/admin-login.html");
+
+        window.location.replace(
+            "/admin-login.html"
+        );
+
         return false;
     }
 
     try {
 
-        const admin = JSON.parse(adminData);
+        const admin =
+            JSON.parse(adminData);
 
-        if (!admin || admin.username !== "admin") {
+        if (
+            !admin ||
+            admin.username !== "admin"
+        ) {
 
-            sessionStorage.removeItem("imprezaAdmin");
+            sessionStorage.removeItem(
+                "imprezaAdmin"
+            );
 
-            window.location.replace("/admin-login.html");
+            window.location.replace(
+                "/admin-login.html"
+            );
 
             return false;
         }
 
-        const adminName = document.getElementById("adminName");
+        if (adminUsername) {
 
-        if (adminName) {
-            adminName.textContent = admin.username;
+            adminUsername.textContent =
+                admin.username;
+
         }
 
         return true;
 
     } catch (error) {
 
-        console.error("Admin session error:", error);
+        console.error(
+            "Admin session error:",
+            error
+        );
 
-        sessionStorage.removeItem("imprezaAdmin");
+        sessionStorage.removeItem(
+            "imprezaAdmin"
+        );
 
-        window.location.replace("/admin-login.html");
+        window.location.replace(
+            "/admin-login.html"
+        );
 
         return false;
     }
 }
 
 
-// ===============================
-// LOAD ORDERS
-// ===============================
+/* =========================================================
+   ERROR
+========================================================= */
 
-async function loadOrders() {
+function showError(message) {
 
-    const ordersContainer = document.getElementById("orders");
-    const errorBox = document.getElementById("errorBox");
-
-    if (!ordersContainer) {
-        console.error("Elementi #orders nuk u gjet.");
+    if (!errorBox) {
         return;
     }
 
-    if (errorBox) {
-        errorBox.style.display = "none";
+    errorBox.textContent =
+        message;
+
+    errorBox.style.display =
+        "block";
+}
+
+
+function hideError() {
+
+    if (!errorBox) {
+        return;
     }
 
-    ordersContainer.innerHTML = `
-        <div class="empty">
-            Duke ngarkuar porositë...
-        </div>
+    errorBox.textContent = "";
+
+    errorBox.style.display =
+        "none";
+}
+
+
+/* =========================================================
+   LOAD ORDERS
+========================================================= */
+
+async function loadOrders() {
+
+    hideError();
+
+    if (!ordersBody) {
+
+        console.error(
+            "Elementi #ordersBody nuk u gjet."
+        );
+
+        return;
+    }
+
+    ordersBody.innerHTML = `
+        <tr>
+            <td
+                colspan="10"
+                class="loading"
+            >
+                Duke ngarkuar porositë...
+            </td>
+        </tr>
     `;
 
     try {
 
-        const response = await fetch(
-            API_URL + "/api/orders",
-            {
-                method: "GET",
-                cache: "no-store"
-            }
-        );
+        const response =
+            await fetch(
+                API_URL + "/api/orders",
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
 
-        const raw = await response.text();
+        const raw =
+            await response.text();
 
-        let data;
+        let data = {};
 
         try {
-            data = JSON.parse(raw);
+
+            data =
+                JSON.parse(raw);
+
         } catch {
-            throw new Error("Serveri ktheu përgjigje jo-JSON.");
+
+            throw new Error(
+                "Serveri ktheu përgjigje jo-JSON."
+            );
         }
 
         if (!response.ok) {
+
             throw new Error(
                 data.message ||
                 "Gabim gjatë marrjes së porosive."
             );
         }
 
-        const orders = Array.isArray(data)
-            ? data
-            : data.orders || [];
+        allOrders =
+            Array.isArray(data)
+                ? data
+                : Array.isArray(data.orders)
+                    ? data.orders
+                    : [];
 
-        updateStats(orders);
+        updateStats();
 
-        if (orders.length === 0) {
-
-            ordersContainer.innerHTML = `
-                <div class="empty">
-                    Nuk ka ende porosi.
-                </div>
-            `;
-
-            return;
-        }
-
-        ordersContainer.innerHTML = "";
-
-        orders.forEach(order => {
-
-            const orderElement = document.createElement("div");
-
-            orderElement.className = "order";
-
-            const image = order.image
-                ? `
-                    <img
-                        class="order-image"
-                        src="${escapeHtml(order.image)}"
-                        alt="Foto e porosisë"
-                    >
-                `
-                : `
-                    <div
-                        class="order-image"
-                        style="
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            color:#999;
-                        "
-                    >
-                        Pa foto
-                    </div>
-                `;
-
-            orderElement.innerHTML = `
-
-                <div class="order-top">
-
-                    <div class="order-id">
-                        Porosia #${order.id}
-                    </div>
-
-                    <div class="order-date">
-                        ${formatDate(order.created_at)}
-                    </div>
-
-                </div>
-
-                <div class="order-content">
-
-                    <div>
-                        ${image}
-                    </div>
-
-                    <div>
-
-                        <div class="details">
-
-                            <div class="detail">
-                                <strong>Produkti</strong>
-                                <span>
-                                    ${escapeHtml(order.product)}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Modeli</strong>
-                                <span>
-                                    ${escapeHtml(order.phoneModel || "-")}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Sasia</strong>
-                                <span>
-                                    ${order.quantity}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Emri</strong>
-                                <span>
-                                    ${escapeHtml(order.name)}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Telefoni</strong>
-                                <span>
-                                    ${escapeHtml(order.phone)}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Adresa</strong>
-                                <span>
-                                    ${escapeHtml(order.address)}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Qyteti</strong>
-                                <span>
-                                    ${escapeHtml(order.city)}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Pagesa</strong>
-                                <span>
-                                    ${escapeHtml(
-                                        order.paymentMethod || "-"
-                                    )}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Teksti</strong>
-                                <span>
-                                    ${escapeHtml(order.text || "-")}
-                                </span>
-                            </div>
-
-                            <div class="detail">
-                                <strong>Totali</strong>
-                                <span class="price">
-                                    €${Number(
-                                        order.total ??
-                                        order.price ??
-                                        0
-                                    ).toFixed(2)}
-                                </span>
-                            </div>
-
-                        </div>
-
-                        <div class="actions">
-
-                            <select
-                                onchange="
-                                    changeStatus(
-                                        ${order.id},
-                                        this.value
-                                    )
-                                "
-                            >
-
-                                <option
-                                    value="E re"
-                                    ${order.status === "E re"
-                                        ? "selected"
-                                        : ""}
-                                >
-                                    E re
-                                </option>
-
-                                <option
-                                    value="Në përpunim"
-                                    ${order.status === "Në përpunim"
-                                        ? "selected"
-                                        : ""}
-                                >
-                                    Në përpunim
-                                </option>
-
-                                <option
-                                    value="Gati"
-                                    ${order.status === "Gati"
-                                        ? "selected"
-                                        : ""}
-                                >
-                                    Gati
-                                </option>
-
-                                <option
-                                    value="Dërguar"
-                                    ${order.status === "Dërguar"
-                                        ? "selected"
-                                        : ""}
-                                >
-                                    Dërguar
-                                </option>
-
-                                <option
-                                    value="Përfunduar"
-                                    ${order.status === "Përfunduar"
-                                        ? "selected"
-                                        : ""}
-                                >
-                                    Përfunduar
-                                </option>
-
-                            </select>
-
-                            <button
-                                class="delete"
-                                onclick="
-                                    deleteOrder(${order.id})
-                                "
-                            >
-                                Fshi
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            `;
-
-            ordersContainer.appendChild(orderElement);
-
-        });
+        renderOrders(
+            getFilteredOrders()
+        );
 
     } catch (error) {
 
-        console.error("Gabim orders:", error);
+        console.error(
+            "Gabim gjatë marrjes së porosive:",
+            error
+        );
 
-        ordersContainer.innerHTML = "";
+        ordersBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="10"
+                    class="empty"
+                >
+                    ❌ Nuk mund të ngarkohen porositë.
+                </td>
+            </tr>
+        `;
 
-        if (errorBox) {
-
-            errorBox.textContent =
-                "Nuk mund të ngarkohen porositë.";
-
-            errorBox.style.display = "block";
-        }
+        showError(
+            "Gabim me API-n e porosive: " +
+            error.message
+        );
     }
 }
 
 
-// ===============================
-// UPDATE STATS
-// ===============================
+/* =========================================================
+   UPDATE STATS
+========================================================= */
 
-function updateStats(orders) {
+function updateStats() {
 
-    const total = orders.length;
+    const total =
+        allOrders.length;
 
-    const newOrders = orders.filter(
-        order => order.status === "E re"
-    ).length;
+    const newCount =
+        allOrders.filter(
+            order =>
+                String(
+                    order.status || "E re"
+                ) === "E re"
+        ).length;
 
-    const processing = orders.filter(
-        order => order.status === "Në përpunim"
-    ).length;
+    const processingCount =
+        allOrders.filter(
+            order =>
+                String(
+                    order.status || ""
+                ) === "Në përpunim"
+        ).length;
 
-    const shipped = orders.filter(
-        order => order.status === "Dërguar"
-    ).length;
-
-    const completed = orders.filter(
-        order => order.status === "Përfunduar"
-    ).length;
-
-    const sales = orders.reduce(
-        (sum, order) =>
-            sum +
-            Number(
-                order.total ??
-                order.price ??
-                0
-            ),
-        0
-    );
-
-    const totalOrders =
-        document.getElementById("totalOrders");
-
-    const newOrdersElement =
-        document.getElementById("newOrders");
-
-    const processingOrders =
-        document.getElementById("processingOrders");
-
-    const shippedOrders =
-        document.getElementById("shippedOrders");
-
-    const completedOrders =
-        document.getElementById("completedOrders");
-
-    const totalSales =
-        document.getElementById("totalSales");
+    const completedCount =
+        allOrders.filter(
+            order =>
+                String(
+                    order.status || ""
+                ) === "Përfunduar"
+        ).length;
 
     if (totalOrders) {
-        totalOrders.textContent = total;
+        totalOrders.textContent =
+            total;
     }
 
-    if (newOrdersElement) {
-        newOrdersElement.textContent = newOrders;
+    if (newOrders) {
+        newOrders.textContent =
+            newCount;
     }
 
     if (processingOrders) {
-        processingOrders.textContent = processing;
-    }
-
-    if (shippedOrders) {
-        shippedOrders.textContent = shipped;
+        processingOrders.textContent =
+            processingCount;
     }
 
     if (completedOrders) {
-        completedOrders.textContent = completed;
-    }
-
-    if (totalSales) {
-        totalSales.textContent =
-            "€" + sales.toFixed(2);
+        completedOrders.textContent =
+            completedCount;
     }
 }
 
 
-// ===============================
-// CHANGE STATUS
-// ===============================
+/* =========================================================
+   RENDER ORDERS
+========================================================= */
 
-async function changeStatus(orderId, status) {
+function renderOrders(orders) {
+
+    if (!ordersBody) {
+        return;
+    }
+
+    if (!orders.length) {
+
+        ordersBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="10"
+                    class="empty"
+                >
+                    📭 Nuk ka porosi.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    ordersBody.innerHTML = "";
+
+    orders.forEach(order => {
+
+        const row =
+            document.createElement("tr");
+
+        const id =
+            order.id ?? "";
+
+        const product =
+            escapeHtml(
+                order.product || "-"
+            );
+
+        const model =
+            escapeHtml(
+                order.phoneModel || ""
+            );
+
+        const name =
+            escapeHtml(
+                order.name || "-"
+            );
+
+        const phone =
+            escapeHtml(
+                order.phone || "-"
+            );
+
+        const address =
+            escapeHtml(
+                order.address || "-"
+            );
+
+        const city =
+            escapeHtml(
+                order.city || "-"
+            );
+
+        const quantity =
+            Number(
+                order.quantity || 0
+            );
+
+        const price =
+            Number(
+                order.price || 0
+            );
+
+        const total =
+            Number(
+                order.total ??
+                quantity * price
+            );
+
+        const payment =
+            escapeHtml(
+                order.paymentMethod || "-"
+            );
+
+        const text =
+            escapeHtml(
+                order.text || ""
+            );
+
+        const status =
+            String(
+                order.status || "E re"
+            );
+
+        const createdAt =
+            order.created_at
+                ? formatDate(
+                    order.created_at
+                )
+                : "-";
+
+        let imageHtml =
+            `<span class="no-image">Pa foto</span>`;
+
+        if (
+            order.image &&
+            String(order.image).trim() !== ""
+        ) {
+
+            imageHtml = `
+                <img
+                    src="${escapeAttribute(order.image)}"
+                    class="product-image"
+                    alt="Foto"
+                    data-image="${escapeAttribute(order.image)}"
+                >
+            `;
+        }
+
+        row.innerHTML = `
+
+            <td>
+                <strong>#${id}</strong>
+
+                <div style="
+                    color:#999;
+                    font-size:11px;
+                    margin-top:4px;
+                ">
+                    ${createdAt}
+                </div>
+            </td>
+
+
+            <td>
+
+                <strong>${product}</strong>
+
+                ${
+                    model
+                        ? `
+                            <div style="
+                                color:#777;
+                                font-size:12px;
+                                margin-top:4px;
+                            ">
+                                ${model}
+                            </div>
+                        `
+                        : ""
+                }
+
+                ${
+                    text
+                        ? `
+                            <div style="
+                                color:#555;
+                                font-size:12px;
+                                margin-top:6px;
+                            ">
+                                📝 ${text}
+                            </div>
+                        `
+                        : ""
+                }
+
+            </td>
+
+
+            <td>
+
+                <div class="customer-info">
+
+                    <strong>
+                        ${name}
+                    </strong>
+
+                    <span>
+                        📞 ${phone}
+                    </span>
+
+                </div>
+
+            </td>
+
+
+            <td>
+
+                <div class="address-info">
+
+                    ${address}
+
+                    <br>
+
+                    <span style="color:#777;">
+                        ${city}
+                    </span>
+
+                </div>
+
+            </td>
+
+
+            <td>
+                ${quantity}
+            </td>
+
+
+            <td>
+
+                <div>
+                    ${price.toFixed(2)} €
+                </div>
+
+                <div class="total">
+                    Total:
+                    ${total.toFixed(2)} €
+                </div>
+
+            </td>
+
+
+            <td>
+                ${payment}
+            </td>
+
+
+            <td>
+                ${imageHtml}
+            </td>
+
+
+            <td>
+
+                <select
+                    class="status-select"
+                    data-id="${id}"
+                >
+
+                    <option
+                        value="E re"
+                        ${status === "E re"
+                            ? "selected"
+                            : ""}
+                    >
+                        E re
+                    </option>
+
+                    <option
+                        value="Në përpunim"
+                        ${status === "Në përpunim"
+                            ? "selected"
+                            : ""}
+                    >
+                        Në përpunim
+                    </option>
+
+                    <option
+                        value="Gati"
+                        ${status === "Gati"
+                            ? "selected"
+                            : ""}
+                    >
+                        Gati
+                    </option>
+
+                    <option
+                        value="Dërguar"
+                        ${status === "Dërguar"
+                            ? "selected"
+                            : ""}
+                    >
+                        Dërguar
+                    </option>
+
+                    <option
+                        value="Përfunduar"
+                        ${status === "Përfunduar"
+                            ? "selected"
+                            : ""}
+                    >
+                        Përfunduar
+                    </option>
+
+                </select>
+
+            </td>
+
+
+            <td>
+
+                <button
+                    type="button"
+                    class="delete-btn"
+                    data-delete-id="${id}"
+                >
+                    Fshi
+                </button>
+
+            </td>
+
+        `;
+
+        ordersBody.appendChild(row);
+    });
+}
+
+
+/* =========================================================
+   UPDATE STATUS
+========================================================= */
+
+async function updateOrderStatus(
+    id,
+    status
+) {
 
     try {
 
-        const response = await fetch(
-            API_URL +
-            `/api/orders/${orderId}/status`,
-            {
-                method: "PUT",
+        const response =
+            await fetch(
+                API_URL +
+                `/api/orders/${id}/status`,
+                {
+                    method: "PUT",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                body: JSON.stringify({
-                    status: status
-                })
-            }
-        );
+                    body: JSON.stringify({
+                        status: status
+                    })
+                }
+            );
 
-        const raw = await response.text();
+        const raw =
+            await response.text();
 
         let data = {};
 
         try {
-            data = JSON.parse(raw);
+
+            data =
+                JSON.parse(raw);
+
         } catch {}
 
-        if (!response.ok) {
+        if (
+            !response.ok ||
+            data.success === false
+        ) {
 
             throw new Error(
                 data.message ||
@@ -465,7 +672,22 @@ async function changeStatus(orderId, status) {
             );
         }
 
-        await loadOrders();
+        const order =
+            allOrders.find(
+                item =>
+                    Number(item.id) ===
+                    Number(id)
+            );
+
+        if (order) {
+            order.status = status;
+        }
+
+        updateStats();
+
+        renderOrders(
+            getFilteredOrders()
+        );
 
     } catch (error) {
 
@@ -475,43 +697,54 @@ async function changeStatus(orderId, status) {
             "Gabim: " +
             error.message
         );
+
+        loadOrders();
     }
 }
 
 
-// ===============================
-// DELETE ORDER
-// ===============================
+/* =========================================================
+   DELETE ORDER
+========================================================= */
 
-async function deleteOrder(orderId) {
+async function deleteOrder(id) {
 
-    const confirmDelete = confirm(
-        "A je i sigurt që dëshiron ta fshish këtë porosi?"
-    );
+    const confirmed =
+        confirm(
+            `A je i sigurt që dëshiron ta fshish porosinë #${id}?`
+        );
 
-    if (!confirmDelete) {
+    if (!confirmed) {
         return;
     }
 
     try {
 
-        const response = await fetch(
-            API_URL +
-            `/api/orders/${orderId}`,
-            {
-                method: "DELETE"
-            }
-        );
+        const response =
+            await fetch(
+                API_URL +
+                `/api/orders/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
 
-        const raw = await response.text();
+        const raw =
+            await response.text();
 
         let data = {};
 
         try {
-            data = JSON.parse(raw);
+
+            data =
+                JSON.parse(raw);
+
         } catch {}
 
-        if (!response.ok) {
+        if (
+            !response.ok ||
+            data.success === false
+        ) {
 
             throw new Error(
                 data.message ||
@@ -519,60 +752,273 @@ async function deleteOrder(orderId) {
             );
         }
 
-        await loadOrders();
+        allOrders =
+            allOrders.filter(
+                order =>
+                    Number(order.id) !==
+                    Number(id)
+            );
+
+        updateStats();
+
+        renderOrders(
+            getFilteredOrders()
+        );
 
     } catch (error) {
 
         console.error(error);
 
         alert(
-            "Gabim: " +
+            "Gabim gjatë fshirjes: " +
             error.message
         );
     }
 }
 
 
-// ===============================
-// LOGOUT
-// ===============================
+/* =========================================================
+   SEARCH
+========================================================= */
 
-function logout() {
+function getFilteredOrders() {
 
-    sessionStorage.removeItem("imprezaAdmin");
-
-    window.location.replace(
-        "/admin-login.html"
-    );
-}
-
-
-// ===============================
-// DATE
-// ===============================
-
-function formatDate(date) {
-
-    if (!date) {
-        return "-";
+    if (!searchInput) {
+        return allOrders;
     }
 
-    return new Date(date).toLocaleString(
-        "sq-AL",
-        {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
+    const query =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+    if (!query) {
+        return allOrders;
+    }
+
+    return allOrders.filter(
+        order => {
+
+            const searchableText = [
+
+                order.id,
+                order.product,
+                order.phoneModel,
+                order.name,
+                order.phone,
+                order.address,
+                order.city,
+                order.paymentMethod,
+                order.text,
+                order.status
+
+            ]
+                .filter(
+                    value =>
+                        value !== null &&
+                        value !== undefined
+                )
+                .join(" ")
+                .toLowerCase();
+
+            return searchableText.includes(
+                query
+            );
         }
     );
 }
 
 
-// ===============================
-// SECURITY
-// ===============================
+/* =========================================================
+   EVENTS
+========================================================= */
+
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "input",
+        function() {
+
+            renderOrders(
+                getFilteredOrders()
+            );
+        }
+    );
+}
+
+
+if (ordersBody) {
+
+    ordersBody.addEventListener(
+        "change",
+        function(event) {
+
+            if (
+                event.target.classList.contains(
+                    "status-select"
+                )
+            ) {
+
+                updateOrderStatus(
+                    event.target.dataset.id,
+                    event.target.value
+                );
+            }
+        }
+    );
+
+
+    ordersBody.addEventListener(
+        "click",
+        function(event) {
+
+            const deleteButton =
+                event.target.closest(
+                    "[data-delete-id]"
+                );
+
+            if (deleteButton) {
+
+                deleteOrder(
+                    deleteButton.dataset.deleteId
+                );
+
+                return;
+            }
+
+
+            const image =
+                event.target.closest(
+                    "[data-image]"
+                );
+
+            if (image) {
+
+                if (modalImage) {
+
+                    modalImage.src =
+                        image.dataset.image;
+                }
+
+                if (imageModal) {
+
+                    imageModal.classList.add(
+                        "active"
+                    );
+                }
+            }
+        }
+    );
+}
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+if (refreshBtn) {
+
+    refreshBtn.addEventListener(
+        "click",
+        loadOrders
+    );
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+if (logoutBtn) {
+
+    logoutBtn.addEventListener(
+        "click",
+        function() {
+
+            sessionStorage.removeItem(
+                "imprezaAdmin"
+            );
+
+            window.location.replace(
+                "/admin-login.html"
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   IMAGE MODAL
+========================================================= */
+
+if (closeModal) {
+
+    closeModal.addEventListener(
+        "click",
+        function() {
+
+            if (imageModal) {
+                imageModal.classList.remove(
+                    "active"
+                );
+            }
+
+            if (modalImage) {
+                modalImage.src = "";
+            }
+        }
+    );
+}
+
+
+if (imageModal) {
+
+    imageModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                imageModal
+            ) {
+
+                imageModal.classList.remove(
+                    "active"
+                );
+
+                if (modalImage) {
+                    modalImage.src = "";
+                }
+            }
+        }
+    );
+}
+
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape" &&
+            imageModal
+        ) {
+
+            imageModal.classList.remove(
+                "active"
+            );
+
+            if (modalImage) {
+                modalImage.src = "";
+            }
+        }
+    }
+);
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
 
 function escapeHtml(value) {
 
@@ -584,17 +1030,75 @@ function escapeHtml(value) {
     }
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
 
-// ===============================
-// START
-// ===============================
+function escapeAttribute(value) {
+
+    return escapeHtml(value);
+}
+
+
+function formatDate(value) {
+
+    if (!value) {
+        return "-";
+    }
+
+    try {
+
+        const date =
+            new Date(value);
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return "-";
+        }
+
+        return date.toLocaleString(
+            "sq-AL",
+            {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    } catch {
+
+        return "-";
+    }
+}
+
+
+/* =========================================================
+   START
+========================================================= */
 
 if (checkAdmin()) {
     loadOrders();
