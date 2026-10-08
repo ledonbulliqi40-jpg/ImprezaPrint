@@ -1,379 +1,74 @@
-<!DOCTYPE html>
-<html lang="sq">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - ImprezaPrint</title>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            color: #111;
-        }
-
-        header {
-            background: #111;
-            color: white;
-            padding: 18px 6%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 25px;
-            font-weight: bold;
-        }
-
-        .logo span {
-            color: #e60023;
-        }
-
-        .admin-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logout {
-            background: #e60023;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .container {
-            width: 88%;
-            max-width: 1400px;
-            margin: 35px auto;
-        }
-
-        h1 {
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 18px;
-            margin-bottom: 35px;
-        }
-
-        .stat {
-            background: white;
-            padding: 22px;
-            border-radius: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        }
-
-        .stat-title {
-            color: #777;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 30px;
-            font-weight: bold;
-        }
-
-        .sales {
-            background: #111;
-            color: white;
-        }
-
-        .sales .stat-title {
-            color: #ccc;
-        }
-
-        .orders-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .refresh {
-            background: #111;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .orders {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .order {
-            background: white;
-            border-radius: 14px;
-            padding: 22px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        }
-
-        .order-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-        }
-
-        .order-id {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .order-date {
-            color: #777;
-            font-size: 13px;
-        }
-
-        .order-content {
-            display: grid;
-            grid-template-columns: 150px 1fr;
-            gap: 25px;
-        }
-
-        .order-image {
-            width: 150px;
-            height: 150px;
-            object-fit: contain;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            background: #fafafa;
-        }
-
-        .details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px 25px;
-        }
-
-        .detail {
-            padding: 8px 0;
-        }
-
-        .detail strong {
-            display: block;
-            color: #777;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-
-        .detail span {
-            font-size: 16px;
-        }
-
-        .price {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .actions {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        select {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background: white;
-        }
-
-        .delete {
-            background: #e60023;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .empty {
-            background: white;
-            padding: 40px;
-            text-align: center;
-            border-radius: 14px;
-            color: #777;
-        }
-
-        .error {
-            background: #ffe5e5;
-            color: #b00020;
-            padding: 18px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        @media (max-width: 1000px) {
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .order-content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                width: 94%;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .details {
-                grid-template-columns: 1fr;
-            }
-
-            .orders-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .order-image {
-                width: 120px;
-                height: 120px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-<header>
-    <div class="logo">
-        Impreza<span>Print</span>
-    </div>
-
-    <div class="admin-right">
-        <span>Admin: <strong id="adminName">...</strong></span>
-        <button class="logout" onclick="logout()">Dil</button>
-    </div>
-</header>
-
-<div class="container">
-
-    <h1>Dashboard</h1>
-
-    <p class="subtitle">
-        Përmbledhje e porosive dhe shitjeve të ImprezaPrint.
-    </p>
-
-    <div class="stats">
-
-        <div class="stat">
-            <div class="stat-title">TOTAL POROSI</div>
-            <div class="stat-value" id="totalOrders">0</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-title">POROSI TË REJA</div>
-            <div class="stat-value" id="newOrders">0</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-title">NË PËRPUNIM</div>
-            <div class="stat-value" id="processingOrders">0</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-title">DËRGUAR</div>
-            <div class="stat-value" id="shippedOrders">0</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-title">PËRFUNDUAR</div>
-            <div class="stat-value" id="completedOrders">0</div>
-        </div>
-
-    </div>
-
-    <div class="stat sales" style="margin-bottom: 35px;">
-        <div class="stat-title">SHITJET TOTALE</div>
-        <div class="stat-value" id="totalSales">€0.00</div>
-        <div style="margin-top: 5px; color: #ccc;">
-            Totali i të gjitha porosive të regjistruara
-        </div>
-    </div>
-
-    <div class="orders-header">
-        <div>
-            <h2>Porositë</h2>
-        </div>
-
-        <button class="refresh" onclick="loadOrders()">
-            ↻ Rifresko
-        </button>
-    </div>
-
-    <div id="errorBox" class="error"></div>
-
-    <div id="orders" class="orders">
-        <div class="empty">
-            Duke ngarkuar porositë...
-        </div>
-    </div>
-
-</div>
-
 <script>
 
-async function checkAdmin() {
+const API_URL =
+    "https://imprezaprint-production.up.railway.app";
+
+
+// ===============================
+// CHECK ADMIN LOGIN
+// ===============================
+
+function checkAdmin() {
+
+    const adminData =
+        sessionStorage.getItem("imprezaAdmin");
+
+    if (!adminData) {
+
+        window.location.replace(
+            "/admin-login.html"
+        );
+
+        return false;
+    }
 
     try {
 
-        const response = await fetch("/api/admin/check");
+        const admin =
+            JSON.parse(adminData);
 
-        if (!response.ok) {
-            window.location.replace("/admin-login.html");
-            return;
+        if (
+            !admin ||
+            admin.username !== "admin"
+        ) {
+
+            sessionStorage.removeItem(
+                "imprezaAdmin"
+            );
+
+            window.location.replace(
+                "/admin-login.html"
+            );
+
+            return false;
         }
 
-        const data = await response.json();
+        document.getElementById(
+            "adminName"
+        ).textContent = admin.username;
 
-        if (!data.loggedIn) {
-            window.location.replace("/admin-login.html");
-            return;
-        }
-
-        document.getElementById("adminName").textContent =
-            data.admin.username;
+        return true;
 
     } catch (error) {
 
         console.error(error);
 
-        window.location.replace("/admin-login.html");
+        sessionStorage.removeItem(
+            "imprezaAdmin"
+        );
+
+        window.location.replace(
+            "/admin-login.html"
+        );
+
+        return false;
     }
 }
 
+
+// ===============================
+// LOAD ORDERS
+// ===============================
 
 async function loadOrders() {
 
@@ -393,31 +88,52 @@ async function loadOrders() {
 
     try {
 
-        const response = await fetch("/api/orders", {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store"
-        });
+        const response =
+            await fetch(
+                API_URL + "/api/orders",
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
 
-        if (!response.ok) {
+        const raw =
+            await response.text();
 
-            const errorText = await response.text();
+        let data;
 
+        try {
+            data = JSON.parse(raw);
+        } catch {
             throw new Error(
-                "API Error " +
-                response.status +
-                ": " +
-                errorText
+                "Serveri ktheu përgjigje jo-JSON."
             );
         }
 
-        const orders = await response.json();
+        if (!response.ok) {
 
-        console.log("Porositë:", orders);
+            throw new Error(
+                data.message ||
+                "Gabim gjatë marrjes së porosive."
+            );
+        }
+
+        const orders =
+            Array.isArray(data)
+                ? data
+                : data.orders || [];
+
+        console.log(
+            "Porositë:",
+            orders
+        );
 
         updateStats(orders);
 
-        if (!Array.isArray(orders) || orders.length === 0) {
+        if (
+            !Array.isArray(orders) ||
+            orders.length === 0
+        ) {
 
             ordersContainer.innerHTML = `
                 <div class="empty">
@@ -435,18 +151,28 @@ async function loadOrders() {
             const orderElement =
                 document.createElement("div");
 
-            orderElement.className = "order";
+            orderElement.className =
+                "order";
 
             const image =
                 order.image
-                    ? `<img
-                        class="order-image"
-                        src="${order.image}"
-                        alt="Foto e porosisë"
-                       >`
+                    ? `
+                        <img
+                            class="order-image"
+                            src="${order.image}"
+                            alt="Foto e porosisë"
+                        >
+                      `
                     : `
-                        <div class="order-image"
-                             style="display:flex;align-items:center;justify-content:center;color:#999;">
+                        <div
+                            class="order-image"
+                            style="
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                color:#999;
+                            "
+                        >
                             Pa foto
                         </div>
                       `;
@@ -460,10 +186,13 @@ async function loadOrders() {
                     </div>
 
                     <div class="order-date">
-                        ${formatDate(order.created_at)}
+                        ${formatDate(
+                            order.created_at
+                        )}
                     </div>
 
                 </div>
+
 
                 <div class="order-content">
 
@@ -471,90 +200,201 @@ async function loadOrders() {
                         ${image}
                     </div>
 
+
                     <div>
 
                         <div class="details">
 
                             <div class="detail">
                                 <strong>Produkti</strong>
-                                <span>${escapeHtml(order.product)}</span>
+                                <span>
+                                    ${escapeHtml(
+                                        order.product
+                                    )}
+                                </span>
                             </div>
+
+
+                            <div class="detail">
+                                <strong>Modeli</strong>
+                                <span>
+                                    ${escapeHtml(
+                                        order.phoneModel ||
+                                        "-"
+                                    )}
+                                </span>
+                            </div>
+
 
                             <div class="detail">
                                 <strong>Sasia</strong>
-                                <span>${order.quantity}</span>
+                                <span>
+                                    ${order.quantity}
+                                </span>
                             </div>
+
 
                             <div class="detail">
                                 <strong>Emri</strong>
-                                <span>${escapeHtml(order.name)}</span>
+                                <span>
+                                    ${escapeHtml(
+                                        order.name
+                                    )}
+                                </span>
                             </div>
+
 
                             <div class="detail">
                                 <strong>Telefoni</strong>
-                                <span>${escapeHtml(order.phone)}</span>
+                                <span>
+                                    ${escapeHtml(
+                                        order.phone
+                                    )}
+                                </span>
                             </div>
+
 
                             <div class="detail">
                                 <strong>Adresa</strong>
-                                <span>${escapeHtml(order.address)}</span>
+                                <span>
+                                    ${escapeHtml(
+                                        order.address
+                                    )}
+                                </span>
                             </div>
+
 
                             <div class="detail">
                                 <strong>Qyteti</strong>
-                                <span>${escapeHtml(order.city)}</span>
+                                <span>
+                                    ${escapeHtml(
+                                        order.city
+                                    )}
+                                </span>
                             </div>
+
+
+                            <div class="detail">
+                                <strong>Pagesa</strong>
+                                <span>
+                                    ${escapeHtml(
+                                        order.paymentMethod ||
+                                        "-"
+                                    )}
+                                </span>
+                            </div>
+
 
                             <div class="detail">
                                 <strong>Teksti</strong>
-                                <span>${escapeHtml(order.text || "-")}</span>
+                                <span>
+                                    ${escapeHtml(
+                                        order.text ||
+                                        "-"
+                                    )}
+                                </span>
                             </div>
+
 
                             <div class="detail">
                                 <strong>Totali</strong>
                                 <span class="price">
-                                    €${Number(order.price).toFixed(2)}
+                                    €${Number(
+                                        order.total ??
+                                        order.price ??
+                                        0
+                                    ).toFixed(2)}
                                 </span>
                             </div>
 
                         </div>
 
+
                         <div class="actions">
 
                             <select
-                                onchange="changeStatus(${order.id}, this.value)"
+                                onchange="
+                                    changeStatus(
+                                        ${order.id},
+                                        this.value
+                                    )
+                                "
                             >
 
-                                <option value="E re"
-                                    ${order.status === "E re" ? "selected" : ""}>
+                                <option
+                                    value="E re"
+                                    ${
+                                        order.status ===
+                                        "E re"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
                                     E re
                                 </option>
 
-                                <option value="Në përpunim"
-                                    ${order.status === "Në përpunim" ? "selected" : ""}>
+
+                                <option
+                                    value="Në përpunim"
+                                    ${
+                                        order.status ===
+                                        "Në përpunim"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
                                     Në përpunim
                                 </option>
 
-                                <option value="Gati"
-                                    ${order.status === "Gati" ? "selected" : ""}>
+
+                                <option
+                                    value="Gati"
+                                    ${
+                                        order.status ===
+                                        "Gati"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
                                     Gati
                                 </option>
 
-                                <option value="Dërguar"
-                                    ${order.status === "Dërguar" ? "selected" : ""}>
+
+                                <option
+                                    value="Dërguar"
+                                    ${
+                                        order.status ===
+                                        "Dërguar"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
                                     Dërguar
                                 </option>
 
-                                <option value="Përfunduar"
-                                    ${order.status === "Përfunduar" ? "selected" : ""}>
+
+                                <option
+                                    value="Përfunduar"
+                                    ${
+                                        order.status ===
+                                        "Përfunduar"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
                                     Përfunduar
                                 </option>
 
                             </select>
 
+
                             <button
                                 class="delete"
-                                onclick="deleteOrder(${order.id})"
+                                onclick="
+                                    deleteOrder(
+                                        ${order.id}
+                                    )
+                                "
                             >
                                 Fshi
                             </button>
@@ -566,98 +406,154 @@ async function loadOrders() {
                 </div>
             `;
 
-            ordersContainer.appendChild(orderElement);
+            ordersContainer.appendChild(
+                orderElement
+            );
+
         });
 
     } catch (error) {
 
-        console.error("Gabim orders:", error);
+        console.error(
+            "Gabim orders:",
+            error
+        );
 
         ordersContainer.innerHTML = "";
 
         errorBox.textContent =
             "Nuk mund të ngarkohen porositë.";
 
-        errorBox.style.display = "block";
+        errorBox.style.display =
+            "block";
     }
 }
 
+
+// ===============================
+// UPDATE STATS
+// ===============================
 
 function updateStats(orders) {
 
     const total =
         orders.length;
 
+
     const newOrders =
-        orders.filter(order =>
-            order.status === "E re"
+        orders.filter(
+            order =>
+                order.status === "E re"
         ).length;
+
 
     const processing =
-        orders.filter(order =>
-            order.status === "Në përpunim"
+        orders.filter(
+            order =>
+                order.status === "Në përpunim"
         ).length;
+
 
     const shipped =
-        orders.filter(order =>
-            order.status === "Dërguar"
+        orders.filter(
+            order =>
+                order.status === "Dërguar"
         ).length;
 
+
     const completed =
-        orders.filter(order =>
-            order.status === "Përfunduar"
+        orders.filter(
+            order =>
+                order.status === "Përfunduar"
         ).length;
+
 
     const sales =
         orders.reduce(
             (sum, order) =>
-                sum + Number(order.price || 0),
+                sum +
+                Number(
+                    order.total ??
+                    order.price ??
+                    0
+                ),
             0
         );
 
-    document.getElementById("totalOrders").textContent =
-        total;
 
-    document.getElementById("newOrders").textContent =
-        newOrders;
+    document.getElementById(
+        "totalOrders"
+    ).textContent = total;
 
-    document.getElementById("processingOrders").textContent =
-        processing;
 
-    document.getElementById("shippedOrders").textContent =
-        shipped;
+    document.getElementById(
+        "newOrders"
+    ).textContent = newOrders;
 
-    document.getElementById("completedOrders").textContent =
-        completed;
 
-    document.getElementById("totalSales").textContent =
+    document.getElementById(
+        "processingOrders"
+    ).textContent = processing;
+
+
+    document.getElementById(
+        "shippedOrders"
+    ).textContent = shipped;
+
+
+    document.getElementById(
+        "completedOrders"
+    ).textContent = completed;
+
+
+    document.getElementById(
+        "totalSales"
+    ).textContent =
         "€" + sales.toFixed(2);
 }
 
 
-async function changeStatus(orderId, status) {
+// ===============================
+// CHANGE STATUS
+// ===============================
+
+async function changeStatus(
+    orderId,
+    status
+) {
 
     try {
 
         const response =
             await fetch(
+                API_URL +
                 `/api/orders/${orderId}/status`,
                 {
                     method: "PUT",
-                    credentials: "include",
+
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type":
+                            "application/json"
                     },
+
                     body: JSON.stringify({
                         status: status
                     })
                 }
             );
 
-        if (!response.ok) {
 
-            const data =
-                await response.json();
+        const raw =
+            await response.text();
+
+        let data = {};
+
+        try {
+            data = JSON.parse(raw);
+        } catch {}
+
+
+        if (!response.ok) {
 
             throw new Error(
                 data.message ||
@@ -665,6 +561,7 @@ async function changeStatus(orderId, status) {
             );
         }
 
+
         await loadOrders();
 
     } catch (error) {
@@ -679,32 +576,48 @@ async function changeStatus(orderId, status) {
 }
 
 
-async function deleteOrder(orderId) {
+// ===============================
+// DELETE ORDER
+// ===============================
+
+async function deleteOrder(
+    orderId
+) {
 
     const confirmDelete =
         confirm(
             "A je i sigurt që dëshiron ta fshish këtë porosi?"
         );
 
+
     if (!confirmDelete) {
         return;
     }
+
 
     try {
 
         const response =
             await fetch(
+                API_URL +
                 `/api/orders/${orderId}`,
                 {
-                    method: "DELETE",
-                    credentials: "include"
+                    method: "DELETE"
                 }
             );
 
-        if (!response.ok) {
 
-            const data =
-                await response.json();
+        const raw =
+            await response.text();
+
+        let data = {};
+
+        try {
+            data = JSON.parse(raw);
+        } catch {}
+
+
+        if (!response.ok) {
 
             throw new Error(
                 data.message ||
@@ -712,6 +625,7 @@ async function deleteOrder(orderId) {
             );
         }
 
+
         await loadOrders();
 
     } catch (error) {
@@ -726,30 +640,25 @@ async function deleteOrder(orderId) {
 }
 
 
-async function logout() {
+// ===============================
+// LOGOUT
+// ===============================
 
-    try {
+function logout() {
 
-        await fetch(
-            "/api/admin/logout",
-            {
-                method: "POST",
-                credentials: "include"
-            }
-        );
+    sessionStorage.removeItem(
+        "imprezaAdmin"
+    );
 
-    } catch (error) {
-
-        console.error(error);
-
-    } finally {
-
-        window.location.replace(
-            "/admin-login.html"
-        );
-    }
+    window.location.replace(
+        "/admin-login.html"
+    );
 }
 
+
+// ===============================
+// DATE
+// ===============================
 
 function formatDate(date) {
 
@@ -770,27 +679,49 @@ function formatDate(date) {
 }
 
 
+// ===============================
+// SECURITY
+// ===============================
+
 function escapeHtml(value) {
 
-    if (value === null ||
-        value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
         return "";
     }
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
 
+// ===============================
 // START
-checkAdmin();
-loadOrders();
+// ===============================
+
+if (checkAdmin()) {
+    loadOrders();
+}
 
 </script>
-
-</body>
-</html>
