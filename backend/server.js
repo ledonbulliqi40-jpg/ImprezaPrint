@@ -22,7 +22,7 @@ app.use(
 );
 
 /* =========================
-   REQUEST LOGGER
+   LOGGER
 ========================= */
 
 app.use((req, res, next) => {
@@ -34,38 +34,19 @@ app.use((req, res, next) => {
 });
 
 /* =========================
-   TIMEOUT
-========================= */
-
-app.use((req, res, next) => {
-    res.setTimeout(30000, () => {
-        console.error("⏱️ Request timeout:", req.method, req.originalUrl);
-
-        if (!res.headersSent) {
-            res.status(408).json({
-                success: false,
-                message: "Kërkesa mori shumë kohë."
-            });
-        }
-    });
-
-    next();
-});
-
-/* =========================
    JSON
 ========================= */
 
 app.use(express.json({ limit: "15mb" }));
 
 /* =========================
-   TEST API
+   TEST
 ========================= */
 
 app.get("/api/test", (req, res) => {
     res.json({
         success: true,
-        message: "Backend + MySQL po punojnë!"
+        message: "ImprezaPrint backend po punon!"
     });
 });
 
@@ -90,7 +71,7 @@ app.post("/api/admin/login", (req, res) => {
         });
     }
 
-    return res.json({
+    res.json({
         success: true,
         message: "Login u krye me sukses!",
         user: {
@@ -101,91 +82,41 @@ app.post("/api/admin/login", (req, res) => {
 });
 
 /* =========================
-   GET ALL ORDERS
+   GET ORDERS
 ========================= */
 
-app.get("/api/orders", (req, res) => {
-    const sql = `
-        SELECT *
-        FROM orders
-        ORDER BY created_at DESC
-    `;
-
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error(
-                "❌ Gabim gjatë marrjes së porosive:",
-                err
-            );
-
-            return res.status(500).json({
-                success: false,
-                message: "Gabim me databazën."
-            });
-        }
+app.get("/api/orders", async (req, res) => {
+    try {
+        const [results] = await db.query(`
+            SELECT *
+            FROM orders
+            ORDER BY created_at DESC
+        `);
 
         res.json({
             success: true,
             orders: results
         });
-    });
+    } catch (error) {
+        console.error(
+            "❌ Gabim gjatë marrjes së porosive:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Gabim me databazën."
+        });
+    }
 });
 
 /* =========================
    CREATE ORDER
 ========================= */
 
-app.post("/api/orders", (req, res) => {
-    const {
-        product,
-        phoneModel,
-        quantity,
-        price,
-        total,
-        paymentMethod,
-        text,
-        image,
-        name,
-        phone,
-        address,
-        city
-    } = req.body;
-
-    console.log("🛒 Porosi e re:");
-    console.log("Product:", product);
-    console.log("Model:", phoneModel);
-    console.log("Quantity:", quantity);
-    console.log("Price:", price);
-    console.log("Total:", total);
-    console.log("Customer:", name);
-    console.log("Phone:", phone);
-    console.log("Address:", address);
-    console.log("City:", city);
-    console.log("Payment:", paymentMethod);
-    console.log(
-        "Photo:",
-        image ? `${String(image).length} chars` : "No photo"
-    );
-
-    if (
-        !product ||
-        !quantity ||
-        price === undefined ||
-        price === null ||
-        !name ||
-        !phone ||
-        !address ||
-        !city
-    ) {
-        return res.status(400).json({
-            success: false,
-            message: "Mungojnë disa të dhëna."
-        });
-    }
-
-    const sql = `
-        INSERT INTO orders
-        (
+app.post("/api/orders", async (req, res) => {
+    try {
+        const {
             product,
             phoneModel,
             quantity,
@@ -198,44 +129,84 @@ app.post("/api/orders", (req, res) => {
             phone,
             address,
             city
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+        } = req.body;
 
-    const calculatedTotal =
-        total !== undefined &&
-        total !== null &&
-        total !== ""
-            ? Number(total)
-            : Number(price) * Number(quantity);
+        console.log("🛒 Porosi e re:");
+        console.log("Product:", product);
+        console.log("Model:", phoneModel);
+        console.log("Quantity:", quantity);
+        console.log("Price:", price);
+        console.log("Total:", total);
+        console.log("Customer:", name);
+        console.log("Phone:", phone);
+        console.log("Address:", address);
+        console.log("City:", city);
+        console.log("Payment:", paymentMethod);
+        console.log(
+            "Photo:",
+            image
+                ? `${String(image).length} chars`
+                : "No photo"
+        );
 
-    const values = [
-        product,
-        phoneModel || "",
-        Number(quantity),
-        Number(price),
-        calculatedTotal,
-        paymentMethod || "cash_on_delivery",
-        text || "",
-        image || "",
-        name,
-        phone,
-        address,
-        city
-    ];
-
-    db.query(sql, values, (err, result) => {
-        if (err) {
-            console.error(
-                "❌ Gabim gjatë ruajtjes së porosisë:",
-                err
-            );
-
-            return res.status(500).json({
+        if (
+            !product ||
+            !quantity ||
+            price === undefined ||
+            price === null ||
+            !name ||
+            !phone ||
+            !address ||
+            !city
+        ) {
+            return res.status(400).json({
                 success: false,
-                message: "Porosia nuk u ruajt."
+                message: "Mungojnë disa të dhëna."
             });
         }
+
+        const calculatedTotal =
+            total !== undefined &&
+            total !== null &&
+            total !== ""
+                ? Number(total)
+                : Number(price) * Number(quantity);
+
+        const sql = `
+            INSERT INTO orders
+            (
+                product,
+                phoneModel,
+                quantity,
+                price,
+                total,
+                paymentMethod,
+                text,
+                image,
+                name,
+                phone,
+                address,
+                city
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const values = [
+            product,
+            phoneModel || "",
+            Number(quantity),
+            Number(price),
+            calculatedTotal,
+            paymentMethod || "cash_on_delivery",
+            text || "",
+            image || "",
+            name,
+            phone,
+            address,
+            city
+        ];
+
+        const [result] = await db.query(sql, values);
 
         console.log(
             "✅ Porosia u ruajt. Order ID:",
@@ -247,105 +218,123 @@ app.post("/api/orders", (req, res) => {
             message: "Porosia u ruajt me sukses!",
             orderId: result.insertId
         });
-    });
+
+    } catch (error) {
+        console.error(
+            "❌ Gabim gjatë ruajtjes së porosisë:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Porosia nuk u ruajt."
+        });
+    }
 });
 
 /* =========================
    UPDATE ORDER STATUS
 ========================= */
 
-app.put("/api/orders/:id/status", (req, res) => {
-    const id = req.params.id;
-    const status = String(req.body?.status || "").trim();
+app.put("/api/orders/:id/status", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const status = String(
+            req.body?.status || ""
+        ).trim();
 
-    const allowedStatuses = [
-        "E re",
-        "Në përpunim",
-        "Përfunduar",
-        "Anuluar"
-    ];
+        const allowedStatuses = [
+            "E re",
+            "Në përpunim",
+            "Përfunduar",
+            "Anuluar"
+        ];
 
-    if (!allowedStatuses.includes(status)) {
-        return res.status(400).json({
-            success: false,
-            message: "Status i pavlefshëm."
-        });
-    }
-
-    db.query(
-        "UPDATE orders SET status = ? WHERE id = ?",
-        [status, id],
-        (err, result) => {
-            if (err) {
-                console.error(
-                    "❌ Gabim gjatë ndryshimit të statusit:",
-                    err
-                );
-
-                return res.status(500).json({
-                    success: false,
-                    message: "Statusi nuk u ndryshua."
-                });
-            }
-
-            res.json({
-                success: true,
-                message: "Statusi u ndryshua me sukses!"
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Status i pavlefshëm."
             });
         }
-    );
+
+        const [result] = await db.query(
+            "UPDATE orders SET status = ? WHERE id = ?",
+            [status, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Porosia nuk u gjet."
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Statusi u ndryshua me sukses!"
+        });
+
+    } catch (error) {
+        console.error(
+            "❌ Gabim gjatë ndryshimit të statusit:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Statusi nuk u ndryshua."
+        });
+    }
 });
 
 /* =========================
    DELETE ORDER
 ========================= */
 
-app.delete("/api/orders/:id", (req, res) => {
-    const id = req.params.id;
+app.delete("/api/orders/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
 
-    db.query(
-        "DELETE FROM orders WHERE id = ?",
-        [id],
-        (err, result) => {
-            if (err) {
-                console.error(
-                    "❌ Gabim gjatë fshirjes:",
-                    err
-                );
+        const [result] = await db.query(
+            "DELETE FROM orders WHERE id = ?",
+            [id]
+        );
 
-                return res.status(500).json({
-                    success: false,
-                    message: "Porosia nuk u fshi."
-                });
-            }
-
-            if (result.affectedRows === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Porosia nuk u gjet."
-                });
-            }
-
-            res.json({
-                success: true,
-                message: "Porosia u fshi."
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Porosia nuk u gjet."
             });
         }
-    );
+
+        res.json({
+            success: true,
+            message: "Porosia u fshi."
+        });
+
+    } catch (error) {
+        console.error(
+            "❌ Gabim gjatë fshirjes:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Porosia nuk u fshi."
+        });
+    }
 });
 
 /* =========================
-   STATIC FRONTEND
+   FRONTEND
 ========================= */
 
 app.use(express.static(FRONTEND_PATH));
 
-/* =========================
-   HOME
-========================= */
-
 app.get("/", (req, res) => {
-    res.sendFile(path.join(FRONTEND_PATH, "index.html"));
+    res.sendFile(
+        path.join(FRONTEND_PATH, "index.html")
+    );
 });
 
 /* =========================
@@ -360,7 +349,7 @@ app.use("/api", (req, res) => {
 });
 
 /* =========================
-   GLOBAL ERROR HANDLER
+   GLOBAL ERROR
 ========================= */
 
 app.use((err, req, res, next) => {
@@ -392,27 +381,9 @@ const server = app.listen(PORT, () => {
     console.log("================================");
 });
 
-/* =========================
-   SERVER ERRORS
-========================= */
-
 server.on("error", (error) => {
     console.error("❌ Server error:", error);
 });
-
-server.on("listening", () => {
-    const address = server.address();
-
-    if (address && typeof address === "object") {
-        console.log(
-            `🌐 Server listening on port ${address.port}`
-        );
-    }
-});
-
-/* =========================
-   UNCAUGHT ERRORS
-========================= */
 
 process.on("uncaughtException", (error) => {
     console.error("❌ Uncaught Exception:", error);
