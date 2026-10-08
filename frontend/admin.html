@@ -1,1107 +1,672 @@
-<script>
 
-"use strict";
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImprezaPrint | Admin</title>
 
-const API_URL =
-    "https://imprezaprint-production.up.railway.app";
-
-let allOrders = [];
-
-
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
-const adminUsername =
-    document.getElementById("adminUsername");
-
-const ordersBody =
-    document.getElementById("ordersBody");
-
-const errorBox =
-    document.getElementById("errorBox");
-
-const refreshBtn =
-    document.getElementById("refreshBtn");
-
-const logoutBtn =
-    document.getElementById("logoutBtn");
-
-const searchInput =
-    document.getElementById("searchInput");
-
-const totalOrders =
-    document.getElementById("totalOrders");
-
-const newOrders =
-    document.getElementById("newOrders");
-
-const processingOrders =
-    document.getElementById("processingOrders");
-
-const completedOrders =
-    document.getElementById("completedOrders");
-
-const imageModal =
-    document.getElementById("imageModal");
-
-const modalImage =
-    document.getElementById("modalImage");
-
-const closeModal =
-    document.getElementById("closeModal");
-
-
-/* =========================================================
-   CHECK ADMIN
-========================================================= */
-
-function checkAdmin() {
-
-    const adminData =
-        sessionStorage.getItem("imprezaAdmin");
-
-    if (!adminData) {
-
-        window.location.replace(
-            "/admin-login.html"
-        );
-
-        return false;
-    }
-
-    try {
-
-        const admin =
-            JSON.parse(adminData);
-
-        if (
-            !admin ||
-            admin.username !== "admin"
-        ) {
-
-            sessionStorage.removeItem(
-                "imprezaAdmin"
-            );
-
-            window.location.replace(
-                "/admin-login.html"
-            );
-
-            return false;
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        if (adminUsername) {
-
-            adminUsername.textContent =
-                admin.username;
-
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6f8;
+            color: #171717;
         }
 
-        return true;
-
-    } catch (error) {
-
-        console.error(
-            "Admin session error:",
-            error
-        );
-
-        sessionStorage.removeItem(
-            "imprezaAdmin"
-        );
-
-        window.location.replace(
-            "/admin-login.html"
-        );
-
-        return false;
-    }
-}
-
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-function showError(message) {
-
-    if (!errorBox) {
-        return;
-    }
-
-    errorBox.textContent =
-        message;
-
-    errorBox.style.display =
-        "block";
-}
-
-
-function hideError() {
-
-    if (!errorBox) {
-        return;
-    }
-
-    errorBox.textContent = "";
-
-    errorBox.style.display =
-        "none";
-}
-
-
-/* =========================================================
-   LOAD ORDERS
-========================================================= */
-
-async function loadOrders() {
-
-    hideError();
-
-    if (!ordersBody) {
-
-        console.error(
-            "Elementi #ordersBody nuk u gjet."
-        );
-
-        return;
-    }
-
-    ordersBody.innerHTML = `
-        <tr>
-            <td
-                colspan="10"
-                class="loading"
-            >
-                Duke ngarkuar porositë...
-            </td>
-        </tr>
-    `;
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL + "/api/orders",
-                {
-                    method: "GET",
-                    cache: "no-store"
-                }
-            );
-
-        const raw =
-            await response.text();
-
-        let data = {};
-
-        try {
-
-            data =
-                JSON.parse(raw);
-
-        } catch {
-
-            throw new Error(
-                "Serveri ktheu përgjigje jo-JSON."
-            );
+        header {
+            background: #111;
+            color: white;
+            padding: 18px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-        if (!response.ok) {
-
-            throw new Error(
-                data.message ||
-                "Gabim gjatë marrjes së porosive."
-            );
+        header h1 {
+            font-size: 23px;
         }
 
-        allOrders =
-            Array.isArray(data)
-                ? data
-                : Array.isArray(data.orders)
-                    ? data.orders
-                    : [];
-
-        updateStats();
-
-        renderOrders(
-            getFilteredOrders()
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Gabim gjatë marrjes së porosive:",
-            error
-        );
-
-        ordersBody.innerHTML = `
-            <tr>
-                <td
-                    colspan="10"
-                    class="empty"
-                >
-                    ❌ Nuk mund të ngarkohen porositë.
-                </td>
-            </tr>
-        `;
-
-        showError(
-            "Gabim me API-n e porosive: " +
-            error.message
-        );
-    }
-}
-
-
-/* =========================================================
-   UPDATE STATS
-========================================================= */
-
-function updateStats() {
-
-    const total =
-        allOrders.length;
-
-    const newCount =
-        allOrders.filter(
-            order =>
-                String(
-                    order.status || "E re"
-                ) === "E re"
-        ).length;
-
-    const processingCount =
-        allOrders.filter(
-            order =>
-                String(
-                    order.status || ""
-                ) === "Në përpunim"
-        ).length;
-
-    const completedCount =
-        allOrders.filter(
-            order =>
-                String(
-                    order.status || ""
-                ) === "Përfunduar"
-        ).length;
-
-    if (totalOrders) {
-        totalOrders.textContent =
-            total;
-    }
-
-    if (newOrders) {
-        newOrders.textContent =
-            newCount;
-    }
-
-    if (processingOrders) {
-        processingOrders.textContent =
-            processingCount;
-    }
-
-    if (completedOrders) {
-        completedOrders.textContent =
-            completedCount;
-    }
-}
-
-
-/* =========================================================
-   RENDER ORDERS
-========================================================= */
-
-function renderOrders(orders) {
-
-    if (!ordersBody) {
-        return;
-    }
-
-    if (!orders.length) {
-
-        ordersBody.innerHTML = `
-            <tr>
-                <td
-                    colspan="10"
-                    class="empty"
-                >
-                    📭 Nuk ka porosi.
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-    ordersBody.innerHTML = "";
-
-    orders.forEach(order => {
-
-        const row =
-            document.createElement("tr");
-
-        const id =
-            order.id ?? "";
-
-        const product =
-            escapeHtml(
-                order.product || "-"
-            );
-
-        const model =
-            escapeHtml(
-                order.phoneModel || ""
-            );
-
-        const name =
-            escapeHtml(
-                order.name || "-"
-            );
-
-        const phone =
-            escapeHtml(
-                order.phone || "-"
-            );
-
-        const address =
-            escapeHtml(
-                order.address || "-"
-            );
-
-        const city =
-            escapeHtml(
-                order.city || "-"
-            );
-
-        const quantity =
-            Number(
-                order.quantity || 0
-            );
-
-        const price =
-            Number(
-                order.price || 0
-            );
-
-        const total =
-            Number(
-                order.total ??
-                quantity * price
-            );
-
-        const payment =
-            escapeHtml(
-                order.paymentMethod || "-"
-            );
-
-        const text =
-            escapeHtml(
-                order.text || ""
-            );
-
-        const status =
-            String(
-                order.status || "E re"
-            );
-
-        const createdAt =
-            order.created_at
-                ? formatDate(
-                    order.created_at
-                )
-                : "-";
-
-        let imageHtml =
-            `<span class="no-image">Pa foto</span>`;
-
-        if (
-            order.image &&
-            String(order.image).trim() !== ""
-        ) {
-
-            imageHtml = `
-                <img
-                    src="${escapeAttribute(order.image)}"
-                    class="product-image"
-                    alt="Foto"
-                    data-image="${escapeAttribute(order.image)}"
-                >
-            `;
+        header span {
+            color: #ff5252;
         }
 
-        row.innerHTML = `
-
-            <td>
-                <strong>#${id}</strong>
-
-                <div style="
-                    color:#999;
-                    font-size:11px;
-                    margin-top:4px;
-                ">
-                    ${createdAt}
-                </div>
-            </td>
-
-
-            <td>
-
-                <strong>${product}</strong>
-
-                ${
-                    model
-                        ? `
-                            <div style="
-                                color:#777;
-                                font-size:12px;
-                                margin-top:4px;
-                            ">
-                                ${model}
-                            </div>
-                        `
-                        : ""
-                }
-
-                ${
-                    text
-                        ? `
-                            <div style="
-                                color:#555;
-                                font-size:12px;
-                                margin-top:6px;
-                            ">
-                                📝 ${text}
-                            </div>
-                        `
-                        : ""
-                }
-
-            </td>
-
-
-            <td>
-
-                <div class="customer-info">
-
-                    <strong>
-                        ${name}
-                    </strong>
-
-                    <span>
-                        📞 ${phone}
-                    </span>
-
-                </div>
-
-            </td>
-
-
-            <td>
-
-                <div class="address-info">
-
-                    ${address}
-
-                    <br>
-
-                    <span style="color:#777;">
-                        ${city}
-                    </span>
-
-                </div>
-
-            </td>
-
-
-            <td>
-                ${quantity}
-            </td>
-
-
-            <td>
-
-                <div>
-                    ${price.toFixed(2)} €
-                </div>
-
-                <div class="total">
-                    Total:
-                    ${total.toFixed(2)} €
-                </div>
-
-            </td>
-
-
-            <td>
-                ${payment}
-            </td>
-
-
-            <td>
-                ${imageHtml}
-            </td>
-
-
-            <td>
-
-                <select
-                    class="status-select"
-                    data-id="${id}"
-                >
-
-                    <option
-                        value="E re"
-                        ${status === "E re"
-                            ? "selected"
-                            : ""}
-                    >
-                        E re
-                    </option>
-
-                    <option
-                        value="Në përpunim"
-                        ${status === "Në përpunim"
-                            ? "selected"
-                            : ""}
-                    >
-                        Në përpunim
-                    </option>
-
-                    <option
-                        value="Gati"
-                        ${status === "Gati"
-                            ? "selected"
-                            : ""}
-                    >
-                        Gati
-                    </option>
-
-                    <option
-                        value="Dërguar"
-                        ${status === "Dërguar"
-                            ? "selected"
-                            : ""}
-                    >
-                        Dërguar
-                    </option>
-
-                    <option
-                        value="Përfunduar"
-                        ${status === "Përfunduar"
-                            ? "selected"
-                            : ""}
-                    >
-                        Përfunduar
-                    </option>
-
-                </select>
-
-            </td>
-
-
-            <td>
-
-                <button
-                    type="button"
-                    class="delete-btn"
-                    data-delete-id="${id}"
-                >
-                    Fshi
-                </button>
-
-            </td>
-
-        `;
-
-        ordersBody.appendChild(row);
-    });
-}
-
-
-/* =========================================================
-   UPDATE STATUS
-========================================================= */
-
-async function updateOrderStatus(
-    id,
-    status
-) {
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL +
-                `/api/orders/${id}/status`,
-                {
-                    method: "PUT",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        status: status
-                    })
-                }
-            );
-
-        const raw =
-            await response.text();
-
-        let data = {};
-
-        try {
-
-            data =
-                JSON.parse(raw);
-
-        } catch {}
-
-        if (
-            !response.ok ||
-            data.success === false
-        ) {
-
-            throw new Error(
-                data.message ||
-                "Statusi nuk u ndryshua."
-            );
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        const order =
-            allOrders.find(
-                item =>
-                    Number(item.id) ===
-                    Number(id)
-            );
-
-        if (order) {
-            order.status = status;
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-weight: bold;
         }
 
-        updateStats();
-
-        renderOrders(
-            getFilteredOrders()
-        );
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Gabim: " +
-            error.message
-        );
-
-        loadOrders();
-    }
-}
-
-
-/* =========================================================
-   DELETE ORDER
-========================================================= */
-
-async function deleteOrder(id) {
-
-    const confirmed =
-        confirm(
-            `A je i sigurt që dëshiron ta fshish porosinë #${id}?`
-        );
-
-    if (!confirmed) {
-        return;
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                API_URL +
-                `/api/orders/${id}`,
-                {
-                    method: "DELETE"
-                }
-            );
-
-        const raw =
-            await response.text();
-
-        let data = {};
-
-        try {
-
-            data =
-                JSON.parse(raw);
-
-        } catch {}
-
-        if (
-            !response.ok ||
-            data.success === false
-        ) {
-
-            throw new Error(
-                data.message ||
-                "Porosia nuk u fshi."
-            );
+        .logout {
+            background: #e63946;
+            color: white;
         }
 
-        allOrders =
-            allOrders.filter(
-                order =>
-                    Number(order.id) !==
-                    Number(id)
-            );
-
-        updateStats();
-
-        renderOrders(
-            getFilteredOrders()
-        );
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Gabim gjatë fshirjes: " +
-            error.message
-        );
-    }
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-function getFilteredOrders() {
-
-    if (!searchInput) {
-        return allOrders;
-    }
-
-    const query =
-        searchInput.value
-            .trim()
-            .toLowerCase();
-
-    if (!query) {
-        return allOrders;
-    }
-
-    return allOrders.filter(
-        order => {
-
-            const searchableText = [
-
-                order.id,
-                order.product,
-                order.phoneModel,
-                order.name,
-                order.phone,
-                order.address,
-                order.city,
-                order.paymentMethod,
-                order.text,
-                order.status
-
-            ]
-                .filter(
-                    value =>
-                        value !== null &&
-                        value !== undefined
-                )
-                .join(" ")
-                .toLowerCase();
-
-            return searchableText.includes(
-                query
-            );
+        .container {
+            width: 94%;
+            max-width: 1450px;
+            margin: 28px auto;
         }
-    );
-}
 
-
-/* =========================================================
-   EVENTS
-========================================================= */
-
-if (searchInput) {
-
-    searchInput.addEventListener(
-        "input",
-        function() {
-
-            renderOrders(
-                getFilteredOrders()
-            );
+        .page-heading {
+            margin-bottom: 20px;
         }
-    );
-}
 
+        .page-heading h2 {
+            margin-bottom: 8px;
+        }
 
-if (ordersBody) {
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(130px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
 
-    ordersBody.addEventListener(
-        "change",
-        function(event) {
+        .stat {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 9px #0000000a;
+            border-left: 4px solid #e63946;
+        }
 
-            if (
-                event.target.classList.contains(
-                    "status-select"
-                )
-            ) {
+        .stat p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
 
-                updateOrderStatus(
-                    event.target.dataset.id,
-                    event.target.value
-                );
+        .stat strong {
+            font-size: 27px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 9px #0000000a;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .toolbar input {
+            width: min(100%, 360px);
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .refresh {
+            background: #171717;
+            color: white;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 13px 11px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        th {
+            background: #fafafa;
+            color: #444;
+        }
+
+        .status-select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 145px;
+        }
+
+        .delete {
+            background: #ffe5e5;
+            color: #b00020;
+        }
+
+        .photo-btn {
+            background: #eee;
+            color: #222;
+        }
+
+        .message {
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            display: none;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            display: block;
+            background: #ffe5e5;
+            color: #a00000;
+        }
+
+        .success {
+            display: block;
+            background: #e1f7e7;
+            color: #176b32;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px;
+            color: #666;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000000dd;
+            z-index: 10;
+            padding: 25px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90vw;
+            max-height: 85vh;
+            text-align: center;
+        }
+
+        .modal img {
+            max-width: 100%;
+            max-height: 75vh;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .modal button {
+            display: block;
+            margin: 0 auto 12px;
+            background: white;
+        }
+
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
-    );
 
+        @media (max-width: 500px) {
+            header h1 {
+                font-size: 19px;
+            }
 
-    ordersBody.addEventListener(
-        "click",
-        function(event) {
+            .container {
+                width: 96%;
+                margin-top: 18px;
+            }
 
-            const deleteButton =
-                event.target.closest(
-                    "[data-delete-id]"
+            .panel {
+                padding: 12px;
+            }
+
+            .stats {
+                gap: 9px;
+            }
+
+            .stat {
+                padding: 14px;
+            }
+
+            .stat strong {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Impreza<span>Print</span> Admin</h1>
+
+        <div class="header-actions">
+            <span id="adminName">Administratori</span>
+            <button class="logout" id="logoutBtn">Dil</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-heading">
+            <h2>Paneli i porosive 📦</h2>
+            <p>Menaxho porositë dhe të dhënat e klientëve.</p>
+        </div>
+
+        <div id="message" class="message" role="status"></div>
+
+        <section class="stats">
+            <div class="stat">
+                <p>Gjithsej porosi</p>
+                <strong id="totalOrders">0</strong>
+            </div>
+
+            <div class="stat">
+                <p>Të reja</p>
+                <strong id="newOrders">0</strong>
+            </div>
+
+            <div class="stat">
+                <p>Në proces</p>
+                <strong id="processingOrders">0</strong>
+            </div>
+
+            <div class="stat">
+                <p>Të dërguara</p>
+                <strong id="shippedOrders">0</strong>
+            </div>
+
+            <div class="stat">
+                <p>Të përfunduara</p>
+                <strong id="completedOrders">0</strong>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="toolbar">
+                <input
+                    type="search"
+                    id="searchInput"
+                    placeholder="Kërko sipas emrit, telefonit ose produktit..."
+                    aria-label="Kërko porosi"
+                >
+
+                <button class="refresh" id="refreshBtn">
+                    Rifresko porositë ↻
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Klienti</th>
+                            <th>Kontakti</th>
+                            <th>Adresa</th>
+                            <th>Produkti</th>
+                            <th>Sasia</th>
+                            <th>Totali</th>
+                            <th>Pagesa</th>
+                            <th>Foto</th>
+                            <th>Statusi</th>
+                            <th>Veprime</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="orders">
+                        <tr>
+                            <td colspan="11" class="empty">
+                                Duke ngarkuar porositë...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="imageModal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <button id="closeModal">Mbyll ✕</button>
+            <img id="modalImage" src="" alt="Foto e personalizuar e porosisë">
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        const API_URL =
+            "https://imprezaprint-production.up.railway.app";
+
+        const adminData = sessionStorage.getItem("imprezaAdmin");
+
+        const ordersBody = document.getElementById("orders");
+        const messageBox = document.getElementById("message");
+        const searchInput = document.getElementById("searchInput");
+
+        let allOrders = [];
+
+        if (!adminData) {
+            window.location.replace("/admin-login.html");
+        } else {
+            try {
+                const admin = JSON.parse(adminData);
+                document.getElementById("adminName").textContent =
+                    admin.username || "Administratori";
+                loadOrders();
+            } catch (error) {
+                sessionStorage.removeItem("imprezaAdmin");
+                window.location.replace("/admin-login.html");
+            }
+        }
+
+        function showMessage(message, type = "error") {
+            messageBox.textContent = message;
+            messageBox.className = "message " + type;
+
+            if (type === "success") {
+                setTimeout(() => {
+                    messageBox.className = "message";
+                }, 4000);
+            }
+        }
+
+        async function apiRequest(url, options = {}) {
+            const response = await fetch(API_URL + url, {
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
+                }
+            });
+
+            const text = await response.text();
+            let data = {};
+
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch {
+                throw new Error(
+                    "Serveri nuk ktheu JSON. Kontrollo backend-in në Railway."
                 );
+            }
 
-            if (deleteButton) {
-
-                deleteOrder(
-                    deleteButton.dataset.deleteId
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Gabim nga serveri: " + response.status
                 );
+            }
 
+            return data;
+        }
+
+        async function loadOrders() {
+            ordersBody.innerHTML =
+                '<tr><td colspan="11" class="empty">Duke ngarkuar porositë...</td></tr>';
+
+            try {
+                const data = await apiRequest("/api/orders");
+
+                allOrders = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data.orders)
+                        ? data.orders
+                        : [];
+
+                updateStats();
+                renderOrders();
+            } catch (error) {
+                ordersBody.innerHTML =
+                    '<tr><td colspan="11" class="empty">Nuk u ngarkuan porositë.</td></tr>';
+
+                showMessage(error.message);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById("totalOrders").textContent =
+                allOrders.length;
+
+            document.getElementById("newOrders").textContent =
+                allOrders.filter(order => isStatus(order, ["E re", "E reja", "New"])).length;
+
+            document.getElementById("processingOrders").textContent =
+                allOrders.filter(order => isStatus(order, ["Në proces", "Ne proces", "Processing"])).length;
+
+            document.getElementById("shippedOrders").textContent =
+                allOrders.filter(order => isStatus(order, ["E dërguar", "E derguar", "Shipped"])).length;
+
+            document.getElementById("completedOrders").textContent =
+                allOrders.filter(order => isStatus(order, ["E përfunduar", "E perfunduar", "Completed"])).length;
+        }
+
+        function isStatus(order, values) {
+            const status = String(order.status || "E re").toLowerCase();
+            return values.some(value => status === value.toLowerCase());
+        }
+
+        function renderOrders() {
+            const query = searchInput.value.trim().toLowerCase();
+
+            const filtered = allOrders.filter(order => {
+                const searchable = [
+                    order.id,
+                    order.name,
+                    order.phone,
+                    order.address,
+                    order.city,
+                    order.product,
+                    order.phoneModel
+                ].join(" ").toLowerCase();
+
+                return searchable.includes(query);
+            });
+
+            if (filtered.length === 0) {
+                ordersBody.innerHTML =
+                    '<tr><td colspan="11" class="empty">Nuk ka porosi për t’u shfaqur.</td></tr>';
                 return;
             }
 
+            ordersBody.replaceChildren();
 
-            const image =
-                event.target.closest(
-                    "[data-image]"
+            filtered.forEach(order => {
+                const row = document.createElement("tr");
+
+                addCell(row, "#" + order.id);
+                addCell(row, order.name || "—");
+                addCell(row, order.phone || "—");
+
+                addCell(
+                    row,
+                    [order.address, order.city].filter(Boolean).join(", ") || "—"
                 );
 
-            if (image) {
-
-                if (modalImage) {
-
-                    modalImage.src =
-                        image.dataset.image;
-                }
-
-                if (imageModal) {
-
-                    imageModal.classList.add(
-                        "active"
-                    );
-                }
-            }
-        }
-    );
-}
-
-
-/* =========================================================
-   REFRESH
-========================================================= */
-
-if (refreshBtn) {
-
-    refreshBtn.addEventListener(
-        "click",
-        loadOrders
-    );
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-if (logoutBtn) {
-
-    logoutBtn.addEventListener(
-        "click",
-        function() {
-
-            sessionStorage.removeItem(
-                "imprezaAdmin"
-            );
-
-            window.location.replace(
-                "/admin-login.html"
-            );
-        }
-    );
-}
-
-
-/* =========================================================
-   IMAGE MODAL
-========================================================= */
-
-if (closeModal) {
-
-    closeModal.addEventListener(
-        "click",
-        function() {
-
-            if (imageModal) {
-                imageModal.classList.remove(
-                    "active"
-                );
-            }
-
-            if (modalImage) {
-                modalImage.src = "";
-            }
-        }
-    );
-}
-
-
-if (imageModal) {
-
-    imageModal.addEventListener(
-        "click",
-        function(event) {
-
-            if (
-                event.target ===
-                imageModal
-            ) {
-
-                imageModal.classList.remove(
-                    "active"
+                addCell(
+                    row,
+                    [order.product, order.phoneModel]
+                        .filter(Boolean)
+                        .join(" — ") || "—"
                 );
 
-                if (modalImage) {
-                    modalImage.src = "";
+                addCell(row, order.quantity ?? "—");
+
+                const total = Number(
+                    order.total ?? Number(order.price || 0) * Number(order.quantity || 1)
+                );
+
+                addCell(
+                    row,
+                    Number.isFinite(total) ? total.toFixed(2) + " €" : "—"
+                );
+
+                addCell(row, paymentLabel(order.paymentMethod));
+
+                const photoCell = document.createElement("td");
+                if (order.image) {
+                    const photoButton = document.createElement("button");
+                    photoButton.className = "photo-btn";
+                    photoButton.textContent = "Shiko foton";
+                    photoButton.addEventListener("click", () => {
+                        openImage(order.image);
+                    });
+                    photoCell.appendChild(photoButton);
+                } else {
+                    photoCell.textContent = "Pa foto";
                 }
-            }
-        }
-    );
-}
+                row.appendChild(photoCell);
 
+                const statusCell = document.createElement("td");
+                const select = document.createElement("select");
+                select.className = "status-select";
 
-document.addEventListener(
-    "keydown",
-    function(event) {
+                const statuses = [
+                    "E re",
+                    "Në proces",
+                    "E dërguar",
+                    "E përfunduar",
+                    "Anuluar"
+                ];
 
-        if (
-            event.key === "Escape" &&
-            imageModal
-        ) {
+                const currentStatus = order.status || "E re";
 
-            imageModal.classList.remove(
-                "active"
-            );
+                statuses.forEach(status => {
+                    const option = document.createElement("option");
+                    option.value = status;
+                    option.textContent = status;
+                    if (status.toLowerCase() === currentStatus.toLowerCase()) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
 
-            if (modalImage) {
-                modalImage.src = "";
-            }
-        }
-    }
-);
+                select.addEventListener("change", () => {
+                    changeStatus(order.id, select.value);
+                });
 
+                statusCell.appendChild(select);
+                row.appendChild(statusCell);
 
-/* =========================================================
-   HELPERS
-========================================================= */
+                const actionCell = document.createElement("td");
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "delete";
+                deleteButton.textContent = "Fshij";
+                deleteButton.addEventListener("click", () => {
+                    deleteOrder(order.id);
+                });
+                actionCell.appendChild(deleteButton);
+                row.appendChild(actionCell);
 
-function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
-    }
-
-    return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-}
-
-
-function escapeAttribute(value) {
-
-    return escapeHtml(value);
-}
-
-
-function formatDate(value) {
-
-    if (!value) {
-        return "-";
-    }
-
-    try {
-
-        const date =
-            new Date(value);
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-            return "-";
+                ordersBody.appendChild(row);
+            });
         }
 
-        return date.toLocaleString(
-            "sq-AL",
-            {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit"
+        function addCell(row, value) {
+            const cell = document.createElement("td");
+            cell.textContent = value == null ? "—" : String(value);
+            row.appendChild(cell);
+        }
+
+        function paymentLabel(method) {
+            const labels = {
+                cash_on_delivery: "Pagesë në dorëzim",
+                cash: "Para në dorë",
+                bank: "Bankë"
+            };
+
+            return labels[method] || method || "—";
+        }
+
+        async function changeStatus(id, status) {
+            try {
+                await apiRequest("/api/orders/" + encodeURIComponent(id) + "/status", {
+                    method: "PUT",
+                    body: JSON.stringify({ status })
+                });
+
+                showMessage("Statusi i porosisë #" + id + " u ndryshua.", "success");
+                await loadOrders();
+            } catch (error) {
+                showMessage("Statusi nuk u ndryshua: " + error.message);
             }
-        );
+        }
 
-    } catch {
+        async function deleteOrder(id) {
+            if (!confirm("A je i sigurt që dëshiron ta fshish porosinë #" + id + "?")) {
+                return;
+            }
 
-        return "-";
-    }
-}
+            try {
+                await apiRequest("/api/orders/" + encodeURIComponent(id), {
+                    method: "DELETE"
+                });
 
+                showMessage("Porosia #" + id + " u fshi.", "success");
+                await loadOrders();
+            } catch (error) {
+                showMessage("Porosia nuk u fshi: " + error.message);
+            }
+        }
 
-/* =========================================================
-   START
-========================================================= */
+        function openImage(image) {
+            const modal = document.getElementById("imageModal");
+            const modalImage = document.getElementById("modalImage");
 
-if (checkAdmin()) {
-    loadOrders();
-}
+            modalImage.src = image.startsWith("data:")
+                ? image
+                : "data:image/jpeg;base64," + image;
 
-</script>
+            modal.classList.add("open");
+        }
+
+        function closeImage() {
+            document.getElementById("imageModal").classList.remove("open");
+            document.getElementById("modalImage").src = "";
+        }
+
+        document.getElementById("closeModal").addEventListener("click", closeImage);
+
+        document.getElementById("imageModal").addEventListener("click", event => {
+            if (event.target.id === "imageModal") {
+                closeImage();
+            }
+        });
+
+        document.getElementById("refreshBtn").addEventListener("click", loadOrders);
+
+        searchInput.addEventListener("input", renderOrders);
+
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            sessionStorage.removeItem("imprezaAdmin");
+            window.location.href = "/admin-login.html";
+        });
+    </script>
+</body>
+</html>
