@@ -2,147 +2,618 @@
 <html lang="sq">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Personalizo | ImprezaPrint</title>
+    <title>ImprezaPrint | Personalizo</title>
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            color: #111;
+        }
+
+        header {
+            width: 100%;
+            background: #fff;
+            padding: 15px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            width: auto;
+            height: 58px;
+            max-width: 180px;
+            object-fit: contain;
+            display: block;
+        }
+
+        nav {
+            display: flex;
+            gap: 25px;
+        }
+
+        nav a {
+            color: #111;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        nav a:hover {
+            color: #777;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .box {
+            background: #fff;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.07);
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .product-info {
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+        }
+
+        .product-info div {
+            padding: 7px 0;
+        }
+
+        .product-name {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .product-price {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #fff;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #111;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .upload-box {
+            border: 2px dashed #ccc;
+            border-radius: 14px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .upload-box:hover {
+            border-color: #111;
+        }
+
+        .upload-box input {
+            display: none;
+        }
+
+        .upload-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .upload-text {
+            color: #777;
+        }
+
+        #preview {
+            max-width: 250px;
+            max-height: 250px;
+            object-fit: contain;
+            display: none;
+            margin: 20px auto 0;
+            border-radius: 12px;
+        }
+
+        .quantity-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quantity-box button {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 8px;
+            background: #111;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .quantity-box input {
+            width: 80px;
+            text-align: center;
+        }
+
+        .total {
+            background: #111;
+            color: white;
+            padding: 18px;
+            border-radius: 12px;
+            margin: 25px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .continue-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            background: #111;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .continue-btn:hover {
+            background: #333;
+        }
+
+        .error {
+            color: #c00000;
+            margin-top: 10px;
+            display: none;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #777;
+        }
+
+        @media (max-width: 700px) {
+
+            header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 14px 5%;
+            }
+
+            nav {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            main {
+                margin: 25px auto;
+                padding: 0 12px;
+            }
+
+            .box {
+                padding: 22px;
+            }
+
+            h1 {
+                font-size: 27px;
+            }
+
+            .total {
+                font-size: 18px;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 <body>
 
+
 <header>
 
-    <div class="logo">
-        Impreza<span>Print</span>
-    </div>
+    <a href="index.html" class="logo">
+
+        <img
+            src="UIHN9939.PNG"
+            alt="ImprezaPrint"
+        >
+
+    </a>
+
 
     <nav>
-        <a href="index.html">Ballina</a>
-        <a href="index.html#products">Produktet</a>
-        <a href="personalizo.html">Personalizo</a>
-        <a href="#">Kontakt</a>
+
+        <a href="index.html">
+            Ballina
+        </a>
+
+        <a href="index.html#products">
+            Produktet
+        </a>
+
+        <a href="personalizo.html">
+            Personalizo
+        </a>
+
     </nav>
 
 </header>
 
 
-<section class="customize">
+<main>
 
-    <div class="customize-container">
+    <div class="box">
 
-        <div class="customize-info">
+        <h1>
+            Personalizo produktin 🎨
+        </h1>
 
-            <h1>Personalizo produktin</h1>
-
-            <p>
-                Ngarko foton tënde dhe krijo një produkt unik.
-            </p>
-
-
-            <form id="customForm">
-
-                <label for="product">
-                    Produkti
-                </label>
-
-                <select id="product" required>
-
-                    <option value="Case" data-price="10">
-                        Case - €10
-                    </option>
-
-                    <option value="Maicë" data-price="15">
-                        Maicë - €15
-                    </option>
-
-                    <option value="Varëse" data-price="4">
-                        Varëse - €4
-                    </option>
-
-                </select>
+        <p class="subtitle">
+            Shto foton, tekstin dhe zgjidh sasinë e produktit.
+        </p>
 
 
-                <label for="photo">
-                    Ngarko foton
-                </label>
+        <div class="product-info">
 
-                <input
-                    type="file"
-                    id="photo"
-                    accept="image/*"
-                    required
+            <div>
+                <span>Produkti:</span>
+
+                <span
+                    class="product-name"
+                    id="productName"
                 >
+                    -
+                </span>
+            </div>
 
 
-                <label for="text">
-                    Emri / Teksti
-                </label>
+            <div id="modelRow">
 
-                <input
-                    type="text"
-                    id="text"
-                    placeholder="P.sh. Ledon"
+                <strong>Modeli:</strong>
+
+                <span id="phoneModel">
+                    -
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <span>Çmimi:</span>
+
+                <span
+                    class="product-price"
+                    id="productPrice"
                 >
-
-
-                <label for="quantity">
-                    Sasia
-                </label>
-
-                <input
-                    type="number"
-                    id="quantity"
-                    value="1"
-                    min="1"
-                    max="20"
-                    required
-                >
-
-
-                <div class="total">
-                    Totali:
-                    <strong id="total">€10</strong>
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="btn"
-                >
-                    Shto në shportë
-                </button>
-
-            </form>
-
-        </div>
-
-
-        <div class="preview">
-
-            <h2>Paraqitja</h2>
-
-            <div class="preview-box">
-
-                <img
-                    id="previewImage"
-                    src=""
-                    alt="Foto e produktit"
-                >
-
-                <span id="previewText">
-                    Fotoja jote
+                    €0.00
                 </span>
 
             </div>
 
         </div>
 
+
+        <div class="field">
+
+            <label for="phoneModelSelect">
+                Modeli i telefonit
+            </label>
+
+            <select id="phoneModelSelect">
+
+                <option value="">
+                    Zgjidh modelin
+                </option>
+
+                <option value="iPhone X">
+                    iPhone X
+                </option>
+
+                <option value="iPhone XS">
+                    iPhone XS
+                </option>
+
+                <option value="iPhone XS Max">
+                    iPhone XS Max
+                </option>
+
+                <option value="iPhone XR">
+                    iPhone XR
+                </option>
+
+                <option value="iPhone 11">
+                    iPhone 11
+                </option>
+
+                <option value="iPhone 11 Pro">
+                    iPhone 11 Pro
+                </option>
+
+                <option value="iPhone 11 Pro Max">
+                    iPhone 11 Pro Max
+                </option>
+
+                <option value="iPhone 12">
+                    iPhone 12
+                </option>
+
+                <option value="iPhone 12 Pro">
+                    iPhone 12 Pro
+                </option>
+
+                <option value="iPhone 12 Pro Max">
+                    iPhone 12 Pro Max
+                </option>
+
+                <option value="iPhone 13">
+                    iPhone 13
+                </option>
+
+                <option value="iPhone 13 Pro">
+                    iPhone 13 Pro
+                </option>
+
+                <option value="iPhone 13 Pro Max">
+                    iPhone 13 Pro Max
+                </option>
+
+                <option value="iPhone 14">
+                    iPhone 14
+                </option>
+
+                <option value="iPhone 14 Plus">
+                    iPhone 14 Plus
+                </option>
+
+                <option value="iPhone 14 Pro">
+                    iPhone 14 Pro
+                </option>
+
+                <option value="iPhone 14 Pro Max">
+                    iPhone 14 Pro Max
+                </option>
+
+                <option value="iPhone 15">
+                    iPhone 15
+                </option>
+
+                <option value="iPhone 15 Plus">
+                    iPhone 15 Plus
+                </option>
+
+                <option value="iPhone 15 Pro">
+                    iPhone 15 Pro
+                </option>
+
+                <option value="iPhone 15 Pro Max">
+                    iPhone 15 Pro Max
+                </option>
+
+                <option value="iPhone 16">
+                    iPhone 16
+                </option>
+
+                <option value="iPhone 16 Plus">
+                    iPhone 16 Plus
+                </option>
+
+                <option value="iPhone 16 Pro">
+                    iPhone 16 Pro
+                </option>
+
+                <option value="iPhone 16 Pro Max">
+                    iPhone 16 Pro Max
+                </option>
+
+                <option value="iPhone 17">
+                    iPhone 17
+                </option>
+
+                <option value="iPhone 17 Air">
+                    iPhone 17 Air
+                </option>
+
+                <option value="iPhone 17 Pro">
+                    iPhone 17 Pro
+                </option>
+
+                <option value="iPhone 17 Pro Max">
+                    iPhone 17 Pro Max
+                </option>
+
+                <option value="Samsung">
+                    Samsung
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Sasia
+            </label>
+
+            <div class="quantity-box">
+
+                <button
+                    type="button"
+                    id="minus"
+                >
+                    −
+                </button>
+
+                <input
+                    type="number"
+                    id="quantity"
+                    value="1"
+                    min="1"
+                    max="50"
+                >
+
+                <button
+                    type="button"
+                    id="plus"
+                >
+                    +
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Fotoja
+            </label>
+
+            <label class="upload-box">
+
+                <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*"
+                >
+
+                <div class="upload-title">
+                    📷 Zgjidh foton
+                </div>
+
+                <div class="upload-text">
+                    Kliko këtu për të ngarkuar foton
+                </div>
+
+                <img
+                    id="preview"
+                    alt="Parapamje"
+                >
+
+            </label>
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="customText">
+                Teksti për personalizim
+            </label>
+
+            <textarea
+                id="customText"
+                placeholder="Shkruaj emrin, tekstin ose dëshirën tënde..."
+            ></textarea>
+
+        </div>
+
+
+        <div class="total">
+
+            <span>
+                Totali
+            </span>
+
+            <span id="totalPrice">
+                €0.00
+            </span>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="continue-btn"
+            id="continueBtn"
+        >
+            Vazhdo te Porosia 📦
+        </button>
+
+
+        <div
+            class="error"
+            id="error"
+        ></div>
+
     </div>
 
-</section>
+</main>
 
 
 <footer>
@@ -154,185 +625,540 @@
 
 <script>
 
-const product =
-    document.getElementById("product");
+    /*
+        MERR PRODUKTIN NGA INDEX.HTML
+    */
 
-const quantity =
-    document.getElementById("quantity");
+    let product =
+        "Case";
 
-const total =
-    document.getElementById("total");
+    let price =
+        10;
 
-const photo =
-    document.getElementById("photo");
+    let currentModel =
+        "";
 
-const previewImage =
-    document.getElementById("previewImage");
-
-const previewText =
-    document.getElementById("previewText");
-
-const textInput =
-    document.getElementById("text");
-
-const form =
-    document.getElementById("customForm");
+    let imageData =
+        null;
 
 
-// ==========================
-// LLOGARITJA E ÇMIMIT
-// ==========================
+    try {
 
-function updateTotal() {
+        const saved =
+            localStorage.getItem(
+                "imprezaCart"
+            );
 
-    const selected =
-        product.options[product.selectedIndex];
+        if (saved) {
 
-    const price =
-        Number(selected.dataset.price);
+            const data =
+                JSON.parse(saved);
 
-    const qty =
-        Number(quantity.value);
+            if (data.product) {
+                product =
+                    data.product;
+            }
 
-    total.textContent =
-        "€" + (price * qty).toFixed(2);
-}
+            if (
+                data.price !== undefined
+            ) {
+                price =
+                    Number(data.price);
+            }
 
+            if (data.phoneModel) {
 
-product.addEventListener(
-    "change",
-    updateTotal
-);
+                currentModel =
+                    data.phoneModel;
 
-quantity.addEventListener(
-    "input",
-    updateTotal
-);
-
-
-// ==========================
-// SHFAQ FOTON
-// ==========================
-
-photo.addEventListener(
-    "change",
-    function() {
-
-        const file =
-            this.files[0];
-
-        if (!file) {
-
-            previewImage.style.display =
-                "none";
-
-            return;
-        }
-
-
-        const reader =
-            new FileReader();
-
-
-        reader.onload =
-            function(event) {
-
-                previewImage.src =
-                    event.target.result;
-
-                previewImage.style.display =
-                    "block";
-
-            };
-
-
-        reader.readAsDataURL(file);
-
-    }
-);
-
-
-// ==========================
-// SHFAQ TEKSTIN
-// ==========================
-
-textInput.addEventListener(
-    "input",
-    function() {
-
-        if (this.value.trim() === "") {
-
-            previewText.textContent =
-                "Fotoja jote";
-
-        } else {
-
-            previewText.textContent =
-                this.value;
+            }
 
         }
 
+    } catch (error) {
+
+        console.error(
+            "Gabim:",
+            error
+        );
+
     }
-);
 
 
-// ==========================
-// SHTO NË SHPORTË
-// ==========================
+    const productName =
+        document.getElementById(
+            "productName"
+        );
 
-form.addEventListener(
-    "submit",
-    function(event) {
+    const productPrice =
+        document.getElementById(
+            "productPrice"
+        );
 
-        event.preventDefault();
+    const totalPrice =
+        document.getElementById(
+            "totalPrice"
+        );
 
+    const quantityInput =
+        document.getElementById(
+            "quantity"
+        );
 
-        const selected =
-            product.options[
-                product.selectedIndex
-            ];
+    const imageInput =
+        document.getElementById(
+            "imageInput"
+        );
 
+    const preview =
+        document.getElementById(
+            "preview"
+        );
 
-        const item = {
+    const customText =
+        document.getElementById(
+            "customText"
+        );
 
-            product:
-                product.value,
+    const errorBox =
+        document.getElementById(
+            "error"
+        );
 
-            price:
-                Number(
-                    selected.dataset.price
-                ),
-
-            quantity:
-                Number(
-                    quantity.value
-                ),
-
-            text:
-                textInput.value,
-
-            image:
-                previewImage.src
-
-        };
-
-
-        localStorage.setItem(
-            "imprezaCart",
-            JSON.stringify(item)
+    const modelSelect =
+        document.getElementById(
+            "phoneModelSelect"
         );
 
 
-        // Shko direkt te Checkout
+    /*
+        SHFAQ PRODUKTIN
+    */
 
-        window.location.href =
-            "checkout.html";
+    productName.textContent =
+        product;
+
+    productPrice.textContent =
+        "€" + price.toFixed(2);
+
+
+    /*
+        MODEL
+    */
+
+    if (currentModel) {
+
+        document.getElementById(
+            "phoneModel"
+        ).textContent =
+            currentModel;
+
+        modelSelect.value =
+            currentModel;
 
     }
-);
+
+
+    /*
+        TOTALI
+    */
+
+    function updateTotal() {
+
+        let quantity =
+            Number(
+                quantityInput.value
+            );
+
+        if (
+            !Number.isFinite(quantity) ||
+            quantity < 1
+        ) {
+
+            quantity = 1;
+
+            quantityInput.value =
+                1;
+        }
+
+        if (quantity > 50) {
+
+            quantity = 50;
+
+            quantityInput.value =
+                50;
+        }
+
+        const total =
+            price * quantity;
+
+        totalPrice.textContent =
+            "€" + total.toFixed(2);
+    }
+
+
+    updateTotal();
+
+
+    /*
+        MINUS
+    */
+
+    document
+        .getElementById("minus")
+        .addEventListener(
+            "click",
+            function() {
+
+                let value =
+                    Number(
+                        quantityInput.value
+                    ) || 1;
+
+                if (value > 1) {
+
+                    value--;
+
+                    quantityInput.value =
+                        value;
+
+                    updateTotal();
+                }
+
+            }
+        );
+
+
+    /*
+        PLUS
+    */
+
+    document
+        .getElementById("plus")
+        .addEventListener(
+            "click",
+            function() {
+
+                let value =
+                    Number(
+                        quantityInput.value
+                    ) || 1;
+
+                if (value < 50) {
+
+                    value++;
+
+                    quantityInput.value =
+                        value;
+
+                    updateTotal();
+                }
+
+            }
+        );
+
+
+    quantityInput.addEventListener(
+        "input",
+        updateTotal
+    );
+
+
+    /*
+        MODEL CHANGE
+    */
+
+    modelSelect.addEventListener(
+        "change",
+        function() {
+
+            currentModel =
+                this.value;
+
+            document.getElementById(
+                "phoneModel"
+            ).textContent =
+                currentModel || "-";
+
+        }
+    );
+
+
+    /*
+        FOTO
+    */
+
+    imageInput.addEventListener(
+        "change",
+        function() {
+
+            const file =
+                this.files[0];
+
+            if (!file) {
+                return;
+            }
+
+
+            if (
+                !file.type.startsWith(
+                    "image/"
+                )
+            ) {
+
+                errorBox.textContent =
+                    "❌ Zgjidh një foto të vlefshme.";
+
+                errorBox.style.display =
+                    "block";
+
+                return;
+            }
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(event) {
+
+                    imageData =
+                        event.target.result;
+
+                    preview.src =
+                        imageData;
+
+                    preview.style.display =
+                        "block";
+
+                    errorBox.style.display =
+                        "none";
+
+                };
+
+
+            reader.readAsDataURL(file);
+
+        }
+    );
+
+
+    /*
+        KOMPRESO FOTON
+    */
+
+    function compressImage(
+        dataUrl,
+        maxWidth = 1200,
+        quality = 0.7
+    ) {
+
+        return new Promise(
+            function(resolve) {
+
+                if (!dataUrl) {
+
+                    resolve(null);
+
+                    return;
+                }
+
+
+                const img =
+                    new Image();
+
+
+                img.onload =
+                    function() {
+
+                        let width =
+                            img.width;
+
+                        let height =
+                            img.height;
+
+
+                        if (
+                            width >
+                            maxWidth
+                        ) {
+
+                            height =
+                                Math.round(
+                                    height *
+                                    maxWidth /
+                                    width
+                                );
+
+                            width =
+                                maxWidth;
+                        }
+
+
+                        const canvas =
+                            document.createElement(
+                                "canvas"
+                            );
+
+
+                        canvas.width =
+                            width;
+
+                        canvas.height =
+                            height;
+
+
+                        const ctx =
+                            canvas.getContext(
+                                "2d"
+                            );
+
+
+                        ctx.drawImage(
+                            img,
+                            0,
+                            0,
+                            width,
+                            height
+                        );
+
+
+                        resolve(
+                            canvas.toDataURL(
+                                "image/jpeg",
+                                quality
+                            )
+                        );
+
+                    };
+
+
+                img.onerror =
+                    function() {
+
+                        resolve(
+                            dataUrl
+                        );
+
+                    };
+
+
+                img.src =
+                    dataUrl;
+
+            }
+        );
+
+    }
+
+
+    /*
+        VAZHDO TE CHECKOUT
+    */
+
+    document
+        .getElementById("continueBtn")
+        .addEventListener(
+            "click",
+            async function() {
+
+                errorBox.style.display =
+                    "none";
+
+
+                const quantity =
+                    Number(
+                        quantityInput.value
+                    ) || 1;
+
+
+                if (
+                    product ===
+                    "Case" &&
+                    !currentModel
+                ) {
+
+                    errorBox.textContent =
+                        "❌ Zgjidh modelin e telefonit.";
+
+                    errorBox.style.display =
+                        "block";
+
+                    return;
+                }
+
+
+                let finalImage =
+                    imageData;
+
+
+                if (finalImage) {
+
+                    finalImage =
+                        await compressImage(
+                            finalImage
+                        );
+
+                }
+
+
+                const total =
+                    price * quantity;
+
+
+                const cart = {
+
+                    product:
+                        product,
+
+                    phoneModel:
+                        currentModel,
+
+                    quantity:
+                        quantity,
+
+                    price:
+                        price,
+
+                    total:
+                        total,
+
+                    text:
+                        customText.value.trim(),
+
+                    image:
+                        finalImage
+
+                };
+
+
+                /*
+                    RUAJ POROSINË
+                */
+
+                localStorage.setItem(
+                    "cart",
+                    JSON.stringify(cart)
+                );
+
+                localStorage.setItem(
+                    "imprezaCart",
+                    JSON.stringify(cart)
+                );
+
+
+                /*
+                    SHKO TE CHECKOUT
+                */
+
+                window.location.href =
+                    "checkout.html";
+
+            }
+        );
 
 </script>
-
 
 </body>
 
