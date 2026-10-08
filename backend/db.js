@@ -1,4 +1,3 @@
-```javascript
 const mysql = require("mysql2/promise");
 
 const db = mysql.createPool({
@@ -25,4 +24,3 @@ async function testDatabase() {
 testDatabase();
 
 module.exports = db;
-```
