@@ -203,43 +203,60 @@ app.post("/api/orders", async (req, res) => {
 
         await ensureOrderShippingColumns();
 
-        const sql = `
-            INSERT INTO orders
-            (
-                product,
-                phoneModel,
-                country,
-                shipping,
-                quantity,
-                price,
-                total,
-                paymentMethod,
-                text,
-                image,
-                name,
-                phone,
-                address,
-                city
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
+        // Përdor emrat realë të kolonave të databazës, sepse skemat e vjetra mund të kenë emra të ndryshëm.
+        const [schemaColumns] = await db.query(
+            `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'orders'`
+        );
+        const actualColumns = new Map(
+            schemaColumns.map(column => [String(column.COLUMN_NAME).toLowerCase(), String(column.COLUMN_NAME)])
+        );
 
-        const values = [
-            product,
-            phoneModel || "",
-            country || "Kosovë",
-            Number(shipping) || 2,
-            Number(quantity),
-            Number(price),
-            calculatedTotal,
-            paymentMethod || "cash_on_delivery",
-            text || "",
-            image || "",
-            name,
-            phone,
-            address,
-            city
+        const fields = [
+            [["product"], product],
+            [["phonemodel", "phone_model", "model"], phoneModel || ""],
+            [["country"], country || "Kosovë"],
+            [["shipping", "shippingcost", "shipping_cost"], Number(shipping) || 2],
+            [["quantity", "qty"], Number(quantity)],
+            [["price", "unitprice", "unit_price"], Number(price)],
+            [["total", "ordertotal", "order_total"], calculatedTotal],
+            [["paymentmethod", "payment_method", "payment"], paymentMethod || "card_pending"],
+            [["text", "customtext", "custom_text", "personalizedtext"], text || ""],
+            [["image", "photo", "productimage", "product_image"], image || ""],
+            [["name", "customername", "customer_name"], name],
+            [["phone", "customerphone", "customer_phone"], phone],
+            [["address", "customeraddress", "customer_address"], address],
+            [["city", "customercity", "customer_city"], city]
         ];
+
+        const insertFields = fields
+            .map(([aliases, value]) => {
+                const actualName = aliases.map(alias => actualColumns.get(alias)).find(Boolean);
+                return actualName ? { name: actualName, value } : null;
+            })
+            .filter(Boolean);
+
+        const requiredAliases = [
+            ["product"], ["quantity", "qty"], ["price", "unitprice", "unit_price"],
+            ["total", "ordertotal", "order_total"], ["name", "customername", "customer_name"],
+            ["phone", "customerphone", "customer_phone"], ["address", "customeraddress", "customer_address"],
+            ["city", "customercity", "customer_city"]
+        ];
+        const missingRequired = requiredAliases
+            .filter(aliases => !aliases.some(alias => actualColumns.has(alias)))
+            .map(aliases => aliases[0]);
+
+        if (missingRequired.length) {
+            console.error("Orders table is missing required columns:", missingRequired.join(", "));
+            return res.status(500).json({
+                success: false,
+                message: "Databaza e porosive ka kolona që mungojnë: " + missingRequired.join(", ")
+            });
+        }
+
+        const sql = `INSERT INTO orders (${insertFields.map(field => "`" + field.name.replace(/`/g, "``") + "`").join(", ")})
+                     VALUES (${insertFields.map(() => "?").join(", ")})`;
+        const values = insertFields.map(field => field.value);
 
         const [result] = await db.query(sql, values);
 
