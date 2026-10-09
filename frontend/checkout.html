@@ -435,8 +435,8 @@
                         Zgjidh mënyrën e pagesës
                     </option>
 
-                    <option value="card" selected>
-                        Pagesë me kartelë — aktivizohet pas lidhjes së pagesave
+                    <option value="card_pending" selected>
+                        Pagesë me kartelë — në pritje të aktivizimit
                     </option>
 
                 </select>
@@ -456,18 +456,15 @@
 
 
             <p class="payment-notice">
-                Pagesa me kartelë ende nuk është lidhur me një procesues pagese.
-                Porositë nuk mund të konfirmohen si të paguara derisa të aktivizohet pagesa e sigurt.
+                Porosia do të ruhet në sistem si në pritje. Pagesa me kartelë nuk tërhiqet automatikisht derisa të lidhet procesuesi i sigurt i pagesave.
             </p>
 
             <button
                 type="submit"
                 class="submit-btn"
                 id="submitBtn"
-                disabled
-                title="Aktivizo pagesat me kartelë për të vazhduar"
             >
-                Pagesa me kartelë së shpejti
+                Dërgo porosinë
             </button>
 
         </form>
@@ -748,6 +745,13 @@
                     .getElementById("paymentMethod")
                     .value;
 
+            if (paymentMethod !== "card_pending") {
+                showMessage("Zgjidh pagesën me kartelë për të vazhduar.", "error");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Dërgo porosinë";
+                return;
+            }
+
             const text =
                 document
                     .getElementById("text")
@@ -894,7 +898,7 @@
                 */
 
                 showMessage(
-                    "✅ Porosia u dërgua! Faleminderit për porosinë. Porosia është regjistruar me sukses.",
+                    "✅ Porosia u ruajt me sukses! Statusi i pagesës: në pritje të aktivizimit të pagesës me kartelë.",
                     "success"
                 );
 
