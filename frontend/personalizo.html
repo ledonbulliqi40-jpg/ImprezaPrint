@@ -350,6 +350,11 @@
             </div>
 
 
+            <div id="productionInfoRow" style="margin-top:10px">
+                <span>Prodhimi:</span>
+                <span id="productionInfo">Punim me sublimim</span>
+            </div>
+
             <div>
 
                 <span>Çmimi:</span>
@@ -740,6 +745,19 @@
 
     productPrice.textContent =
         "€" + price.toFixed(2);
+
+    const isPhoneCase = /^Case\\b/i.test(product);
+    const phoneModelField = modelSelect.closest(".field");
+    const phoneModelRow = document.getElementById("modelRow");
+    if (phoneModelField) phoneModelField.style.display = isPhoneCase ? "block" : "none";
+    if (phoneModelRow) phoneModelRow.style.display = isPhoneCase ? "block" : "none";
+
+    const productionInfo = document.getElementById("productionInfo");
+    if (productionInfo) {
+        productionInfo.textContent = /maicë me logo|duks me logo/i.test(product)
+            ? "Punim me folie transferuese"
+            : "Punim me sublimim";
+    }
 
 
     /*
