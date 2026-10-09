@@ -749,6 +749,15 @@
             color: #666;
             font-size: 13px;
         }
+        .product-card[data-category="maice"] .product-image,
+        .product-card[data-category="hoodie"] .product-image {
+            background: #f5f5f5;
+        }
+        .product-card[data-category="maice"] .product-image img,
+        .product-card[data-category="hoodie"] .product-image img {
+            object-fit: cover;
+            object-position: center;
+        }
         .product-card .btn:disabled {
             opacity: .55;
             cursor: not-allowed;
@@ -893,6 +902,9 @@
         >
             ❤️ Varëse
         </button>
+
+        <button class="filter-btn" onclick="filterProducts('maice', this)">👕 Maica me logo</button>
+        <button class="filter-btn" onclick="filterProducts('hoodie', this)">🧥 Duks me logo</button>
 
     </div>
 
