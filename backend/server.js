@@ -262,7 +262,7 @@ app.post("/api/orders", async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Porosia nuk u ruajt."
+            message: "Porosia nuk u ruajt. Kodi i gabimit: " + (error.code || "SERVER_ERROR")
         });
     }
 });
