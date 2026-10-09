@@ -17,6 +17,9 @@ async function ensureOrderShippingColumns() {
          AND COLUMN_NAME IN ('country', 'shipping')`
     );
     const existing = new Set(columns.map(column => column.COLUMN_NAME));
+    if (!existing.has("phoneModel")) {
+        await db.query("ALTER TABLE orders ADD COLUMN phoneModel VARCHAR(120) NULL");
+    }
     if (!existing.has("country")) {
         await db.query("ALTER TABLE orders ADD COLUMN country VARCHAR(80) NULL");
     }
