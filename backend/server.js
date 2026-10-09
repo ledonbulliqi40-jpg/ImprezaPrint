@@ -12,9 +12,9 @@ const FRONTEND_PATH = path.join(__dirname, "..", "frontend");
 // Shton kolonat e transportit pa fshirë ose ndryshuar porositë ekzistuese.
 async function ensureOrderShippingColumns() {
     const [columns] = await db.query(
-        `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+        `SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'orders'
-         AND COLUMN_NAME IN ('phoneModel', 'country', 'shipping')`
+         AND COLUMN_NAME IN ('phoneModel', 'country', 'shipping', 'image')`
     );
     const existing = new Set(columns.map(column => column.COLUMN_NAME));
     if (!existing.has("phoneModel")) {
@@ -25,6 +25,14 @@ async function ensureOrderShippingColumns() {
     }
     if (!existing.has("shipping")) {
         await db.query("ALTER TABLE orders ADD COLUMN shipping DECIMAL(10,2) NOT NULL DEFAULT 0.00");
+    }
+
+    // Fotot e ngarkuara mund të kalojnë kufirin e TEXT.
+    const imageColumn = columns.find(
+        column => String(column.COLUMN_NAME).toLowerCase() === "image"
+    );
+    if (imageColumn && String(imageColumn.DATA_TYPE).toLowerCase() !== "longtext") {
+        await db.query("ALTER TABLE orders MODIFY COLUMN image LONGTEXT NULL");
     }
 }
 
@@ -56,7 +64,7 @@ app.use((req, res, next) => {
    JSON
 ========================= */
 
-app.use(express.json({ limit: "15mb" }));
+app.use(express.json({ limit: "20mb" }));
 
 /* =========================
    TEST
