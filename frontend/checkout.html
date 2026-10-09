@@ -320,6 +320,11 @@
             </div>
 
             <div class="summary-row">
+                <span class="summary-label">Posta</span>
+                <span class="summary-value" id="shippingCost">€2.00</span>
+            </div>
+
+            <div class="summary-row">
                 <span class="summary-label">Totali</span>
                 <span class="summary-value total" id="total">
                     €0.00
@@ -380,6 +385,15 @@
 
 
             <div>
+                <label for="country">Shteti / Vendi</label>
+                <select id="country" required>
+                    <option value="Kosovë" data-shipping="2" selected>Kosovë — posta 2€</option>
+                    <option value="Shqipëri" data-shipping="5">Shqipëri — posta 5€</option>
+                    <option value="Maqedoni e Veriut" data-shipping="5">Maqedoni e Veriut — posta 5€</option>
+                </select>
+            </div>
+
+            <div>
                 <label for="city">
                     Qyteti
                 </label>
@@ -404,8 +418,8 @@
                         Zgjidh mënyrën e pagesës
                     </option>
 
-                    <option value="cash_on_delivery">
-                        Pagesë gjatë pranimit
+                    <option value="card" selected>
+                        Pagesë vetëm me kartelë
                     </option>
 
                 </select>
@@ -525,6 +539,25 @@
     const message =
         document.getElementById("message");
 
+    const countrySelect = document.getElementById("country");
+    const shippingCostElement = document.getElementById("shippingCost");
+
+    function getShippingCost() {
+        const selected = countrySelect.options[countrySelect.selectedIndex];
+        return Number(selected?.dataset.shipping || 2);
+    }
+
+    function updateCheckoutTotal() {
+        if (!orderData) return;
+        const qty = Number(orderData.quantity) || 1;
+        const unitPrice = Number(orderData.price) || 0;
+        const shipping = getShippingCost();
+        const productsTotal = Number(orderData.total) || unitPrice * qty;
+        shippingCostElement.textContent = "€" + shipping.toFixed(2);
+        total.textContent = "€" + (productsTotal + shipping).toFixed(2);
+    }
+
+    countrySelect.addEventListener("change", updateCheckoutTotal);
 
     /*
         SHFAQ TË DHËNAT E PRODUKTIT
@@ -566,7 +599,8 @@
 
         total.textContent =
             "€" +
-            orderTotal.toFixed(2);
+            (orderTotal + getShippingCost()).toFixed(2);
+        shippingCostElement.textContent = "€" + getShippingCost().toFixed(2);
 
         productDescription.textContent =
             product;
@@ -714,9 +748,12 @@
                 Number(orderData.price) ||
                 0;
 
-            const orderTotal =
+            const productsTotal =
                 Number(orderData.total) ||
                 productPrice * qty;
+            const shipping = getShippingCost();
+            const orderTotal = productsTotal + shipping;
+            const country = countrySelect.value;
 
             const image =
                 orderData.image ||
@@ -734,6 +771,8 @@
                 price: productPrice,
 
                 total: orderTotal,
+                country: country,
+                shipping: shipping,
 
                 paymentMethod:
                     paymentMethod,
