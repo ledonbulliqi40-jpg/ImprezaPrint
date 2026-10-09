@@ -14,7 +14,7 @@ async function ensureOrderShippingColumns() {
     const [columns] = await db.query(
         `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'orders'
-         AND COLUMN_NAME IN ('country', 'shipping')`
+         AND COLUMN_NAME IN ('phoneModel', 'country', 'shipping')`
     );
     const existing = new Set(columns.map(column => column.COLUMN_NAME));
     if (!existing.has("phoneModel")) {
