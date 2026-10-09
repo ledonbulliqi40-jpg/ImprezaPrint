@@ -746,7 +746,7 @@
     productPrice.textContent =
         "€" + price.toFixed(2);
 
-    const isPhoneCase = /^Case\\b/i.test(product);
+    const isPhoneCase = /^Case\b/i.test(product);
     const phoneModelField = modelSelect.closest(".field");
     const phoneModelRow = document.getElementById("modelRow");
     if (phoneModelField) phoneModelField.style.display = isPhoneCase ? "block" : "none";
@@ -1092,8 +1092,7 @@
 
 
                 if (
-                    product ===
-                    "Case" &&
+                    /^Case\b/i.test(product) &&
                     !currentModel
                 ) {
 
