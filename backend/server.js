@@ -9,6 +9,22 @@ const PORT = process.env.PORT || 3000;
 
 const FRONTEND_PATH = path.join(__dirname, "..", "frontend");
 
+// Shton kolonat e transportit pa fshirë ose ndryshuar porositë ekzistuese.
+async function ensureOrderShippingColumns() {
+    const [columns] = await db.query(
+        `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'orders'
+         AND COLUMN_NAME IN ('country', 'shipping')`
+    );
+    const existing = new Set(columns.map(column => column.COLUMN_NAME));
+    if (!existing.has("country")) {
+        await db.query("ALTER TABLE orders ADD COLUMN country VARCHAR(80) NULL");
+    }
+    if (!existing.has("shipping")) {
+        await db.query("ALTER TABLE orders ADD COLUMN shipping DECIMAL(10,2) NOT NULL DEFAULT 0.00");
+    }
+}
+
 /* =========================
    CORS
 ========================= */
@@ -119,6 +135,8 @@ app.post("/api/orders", async (req, res) => {
         const {
             product,
             phoneModel,
+            country,
+            shipping,
             quantity,
             price,
             total,
@@ -172,11 +190,15 @@ app.post("/api/orders", async (req, res) => {
                 ? Number(total)
                 : Number(price) * Number(quantity);
 
+        await ensureOrderShippingColumns();
+
         const sql = `
             INSERT INTO orders
             (
                 product,
                 phoneModel,
+                country,
+                shipping,
                 quantity,
                 price,
                 total,
@@ -188,12 +210,14 @@ app.post("/api/orders", async (req, res) => {
                 address,
                 city
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
             product,
             phoneModel || "",
+            country || "Kosovë",
+            Number(shipping) || 2,
             Number(quantity),
             Number(price),
             calculatedTotal,
