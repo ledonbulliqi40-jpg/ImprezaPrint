@@ -14,7 +14,7 @@ async function ensureOrderShippingColumns() {
     const [columns] = await db.query(
         `SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'orders'
-         AND COLUMN_NAME IN ('phoneModel', 'country', 'shipping', 'image')`
+         AND COLUMN_NAME IN ('phoneModel', 'country', 'shipping', 'image', 'total')`
     );
     const existing = new Set(columns.map(column => column.COLUMN_NAME));
     if (!existing.has("phoneModel")) {
@@ -25,6 +25,9 @@ async function ensureOrderShippingColumns() {
     }
     if (!existing.has("shipping")) {
         await db.query("ALTER TABLE orders ADD COLUMN shipping DECIMAL(10,2) NOT NULL DEFAULT 0.00");
+    }
+    if (!existing.has("total")) {
+        await db.query("ALTER TABLE orders ADD COLUMN total DECIMAL(10,2) NOT NULL DEFAULT 0.00");
     }
 
     // Fotot e ngarkuara mund të kalojnë kufirin e TEXT.
