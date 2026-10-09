@@ -709,6 +709,52 @@
             background-image: url("https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85");
         }
 
+        .product-card .product-image {
+            position: relative;
+            background-image: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+        .product-card .product-image img {
+            width: 100%;
+            height: 100%;
+            max-height: 230px;
+            object-fit: contain;
+            display: block;
+        }
+        .logo-product .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .product-logo-stamp {
+            position: absolute;
+            left: 50%;
+            top: 48%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,.9);
+            color: #111;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 5px 8px;
+            border-radius: 4px;
+            letter-spacing: .4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.12);
+            pointer-events: none;
+        }
+        .production-note {
+            margin: -8px 0 16px;
+            color: #666;
+            font-size: 13px;
+        }
+        .product-card .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+
         @media (max-width: 800px) {
             .product-image {
                 min-height: 220px;
@@ -860,9 +906,7 @@
 
         <div class="product-card" data-category="gure">
 
-            <div class="product-image">
-                🪨
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=900&q=85" alt="Gur 20×20" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -884,9 +928,7 @@
 
         <div class="product-card" data-category="gure">
 
-            <div class="product-image">
-                ❤️
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=900&q=85" alt="Gur Zemër 20×20" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -908,9 +950,7 @@
 
         <div class="product-card" data-category="gure">
 
-            <div class="product-image">
-                🖼️
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=900&q=85" alt="Gur i madh 20×30" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -932,9 +972,7 @@
 
         <div class="product-card" data-category="gure">
 
-            <div class="product-image">
-                🪨
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=900&q=85" alt="Gur 15×20" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -960,7 +998,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone X" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -982,7 +1020,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone XS" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1004,7 +1042,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone XS Max" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1026,7 +1064,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone XR" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1052,7 +1090,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 11" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1074,7 +1112,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 11 Pro" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1096,7 +1134,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 11 Pro Max" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1122,7 +1160,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 12" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1144,7 +1182,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 12 Pro" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1166,7 +1204,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 12 Pro Max" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1192,7 +1230,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 13" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1214,7 +1252,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 13 Pro" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1236,7 +1274,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 13 Pro Max" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1262,7 +1300,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 14" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1284,7 +1322,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 14 Plus" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1306,7 +1344,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 14 Pro" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1328,7 +1366,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 14 Pro Max" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1354,7 +1392,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 15" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1376,7 +1414,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 15 Plus" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1398,7 +1436,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 15 Pro" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1420,7 +1458,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 15 Pro Max" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1446,7 +1484,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 16" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1468,7 +1506,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 16 Plus" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1490,7 +1528,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 16 Pro" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1512,7 +1550,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 16 Pro Max" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1538,7 +1576,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 17" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1560,7 +1598,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 17 Air" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1582,7 +1620,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 17 Pro" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1604,7 +1642,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">📱</div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case iPhone 17 Pro Max" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1630,9 +1668,7 @@
 
         <div class="product-card" data-category="telefon">
 
-            <div class="product-image">
-                📱
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85" alt="Case Samsung" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1658,9 +1694,7 @@
 
         <div class="product-card" data-category="taza">
 
-            <div class="product-image">
-                ☕
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=85" alt="Tazë e bardhë" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1682,9 +1716,7 @@
 
         <div class="product-card" data-category="taza">
 
-            <div class="product-image">
-                ☕
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=85" alt="Tazë me vesh të kuqe" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1710,9 +1742,7 @@
 
         <div class="product-card" data-category="varse">
 
-            <div class="product-image">
-                ❤️
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=900&q=85" alt="Varëse zemër" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1734,9 +1764,7 @@
 
         <div class="product-card" data-category="varse">
 
-            <div class="product-image">
-                📿
-            </div>
+            <div class="product-image"><img src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=900&q=85" alt="Varëse të vogla" loading="lazy"></div>
 
             <div class="product-info">
 
@@ -1754,6 +1782,35 @@
             </div>
 
         </div>
+
+        <!-- MAICA ME LOGO: transfer film -->
+        <div class="product-card logo-product" data-category="maice">
+            <div class="product-image">
+                <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85" alt="Maicë me logo ImprezaPrint, e punuar me folie transferuese" loading="lazy">
+                <span class="product-logo-stamp">ImprezaPrint</span>
+            </div>
+            <div class="product-info">
+                <h3>Maicë me logo</h3>
+                <p class="price">€15</p>
+                <p class="production-note">Logo me folie transferuese</p>
+                <button class="btn" onclick="chooseProduct('Maicë me logo', 15)">Personalizo</button>
+            </div>
+        </div>
+
+        <!-- DUKS ME LOGO: transfer film; çmimi pret konfirmimin -->
+        <div class="product-card logo-product" data-category="hoodie">
+            <div class="product-image">
+                <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85" alt="Duks me logo ImprezaPrint, i punuar me folie transferuese" loading="lazy">
+                <span class="product-logo-stamp">ImprezaPrint</span>
+            </div>
+            <div class="product-info">
+                <h3>Duks me logo</h3>
+                <p class="price">Çmimi në konfirmim</p>
+                <p class="production-note">Logo me folie transferuese</p>
+                <button class="btn" type="button" disabled>Çmimi së shpejti</button>
+            </div>
+        </div>
+
 
 
     </div>
