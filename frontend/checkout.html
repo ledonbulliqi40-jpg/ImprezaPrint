@@ -167,6 +167,23 @@
             background: #333;
         }
 
+        .payment-notice {
+            padding: 14px 16px;
+            border: 1px solid #e7c98b;
+            border-radius: 10px;
+            background: #fff8e8;
+            color: #795515;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+
+
         .submit-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -419,7 +436,7 @@
                     </option>
 
                     <option value="card" selected>
-                        Pagesë vetëm me kartelë
+                        Pagesë me kartelë — aktivizohet pas lidhjes së pagesave
                     </option>
 
                 </select>
@@ -438,12 +455,19 @@
             </div>
 
 
+            <p class="payment-notice">
+                Pagesa me kartelë ende nuk është lidhur me një procesues pagese.
+                Porositë nuk mund të konfirmohen si të paguara derisa të aktivizohet pagesa e sigurt.
+            </p>
+
             <button
                 type="submit"
                 class="submit-btn"
                 id="submitBtn"
+                disabled
+                title="Aktivizo pagesat me kartelë për të vazhduar"
             >
-                Dërgo Porosinë
+                Pagesa me kartelë së shpejti
             </button>
 
         </form>
