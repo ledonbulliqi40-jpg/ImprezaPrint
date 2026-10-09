@@ -675,6 +675,46 @@
             transform: translateY(0);
         }
 
+
+        /* Produktet shfaqen me fotografi sipas kategorisë */
+        .product-image {
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: transparent;
+            min-height: 230px;
+        }
+
+        .product-card[data-category="telefon"] .product-image {
+            background-image: url("https://images.unsplash.com/photo-1603313011105-320f26a4f6f1?auto=format&fit=crop&w=900&q=85");
+        }
+
+        .product-card[data-category="taza"] .product-image,
+        .product-card[data-category="taza"] .product-image {
+            background-image: url("https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=85");
+        }
+
+        .product-card[data-category="varse"] .product-image {
+            background-image: url("https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=900&q=85");
+        }
+
+        .product-card[data-category="gure"] .product-image {
+            background-image: url("https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=900&q=85");
+        }
+
+        .product-card[data-category="maice"] .product-image,
+        .product-card[data-category="hoodie"] .product-image {
+            background-image: url("https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85");
+        }
+
+        @media (max-width: 800px) {
+            .product-image {
+                min-height: 220px;
+            }
+        }
+
     </style>
 
 </head>
