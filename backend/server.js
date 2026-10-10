@@ -363,7 +363,7 @@ app.get("/api/paysera/callback", async (req, res) => {
         const receivedAmount = Number(hasPayAmount ? callbackData.payamount : callbackData.amount);
         const expectedAmount = Math.round(Number(totalKey ? order[totalKey] : 0) * 100);
         if (currency !== "EUR" || !Number.isFinite(receivedAmount) || receivedAmount !== expectedAmount) return res.status(400).type("text/plain").send("Amount mismatch");
-        if (status === "1") {
+        if (status === "1" || status === "3") {
             await db.query("UPDATE orders SET paymentStatus = ? WHERE id = ?", ["paid", orderId]);
             console.log("Paysera payment confirmed for order", orderId);
         } else {
