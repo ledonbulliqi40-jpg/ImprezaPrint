@@ -358,8 +358,9 @@ app.get("/api/paysera/callback", async (req, res) => {
         const order = rows[0];
         const keys = Object.keys(order);
         const totalKey = keys.find(key => ["total", "ordertotal", "order_total"].includes(key.toLowerCase()));
-        const currency = String(callbackData.currency || callbackData.paycurrency || "").toUpperCase();
-        const receivedAmount = Number(callbackData.amount || callbackData.payamount);
+        const hasPayAmount = callbackData.payamount !== undefined && callbackData.payamount !== "";
+        const currency = String(hasPayAmount ? callbackData.paycurrency : callbackData.currency || "").toUpperCase();
+        const receivedAmount = Number(hasPayAmount ? callbackData.payamount : callbackData.amount);
         const expectedAmount = Math.round(Number(totalKey ? order[totalKey] : 0) * 100);
         if (currency !== "EUR" || !Number.isFinite(receivedAmount) || receivedAmount !== expectedAmount) return res.status(400).type("text/plain").send("Amount mismatch");
         if (status === "1") {
