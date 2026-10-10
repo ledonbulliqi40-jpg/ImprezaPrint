@@ -425,25 +425,14 @@
 
 
             <div>
-                <label for="paymentMethod">
-                    Mënyra e pagesës
-                </label>
-
-                <select id="paymentMethod" required>
-
-                    <option value="">
-                        Zgjidh mënyrën e pagesës
-                    </option>
-
-                    <option value="card_pending" selected>
-                        Pagesë me kartelë — në pritje të aktivizimit
-                    </option>
-
-                </select>
+                <label>Mënyra e pagesës</label>
+                <div class="payment-notice" style="border-color:#b7dfc2;background:#effaf2;color:#205c32;">
+                    💵 <strong>Pagesë në dorëzim</strong><br>
+                    Paguani kur porosia t’ju dorëzohet. Për momentin pranojmë vetëm pagesën në dorëzim.
+                </div>
             </div>
 
-
-            <div>
+<div>
                 <label for="text">
                     Teksti për personalizim
                 </label>
@@ -455,9 +444,16 @@
             </div>
 
 
-            <p class="payment-notice">
-                Porosia do të ruhet në sistem si në pritje. Pagesa me kartelë nuk tërhiqet automatikisht derisa të lidhet procesuesi i sigurt i pagesave.
-            </p>
+            <div class="payment-notice">
+                <strong>⚠️ Kujdes – Produktet e personalizuara</strong><br>
+                Produktet që prodhohen sipas fotos, emrit ose dizajnit të zgjedhur nga klienti nuk pranohen për kthim për shkak të ndryshimit të mendjes, përveç rasteve kur produkti është me defekt, i dëmtuar ose nuk përputhet me porosinë, sipas legjislacionit në fuqi.
+                Ju lutemi, kontrolloni me kujdes modelin e telefonit, foton, tekstin dhe të dhënat para se ta konfirmoni porosinë.
+            </div>
+
+            <label style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;font-weight:400;">
+                <input type="checkbox" id="returnPolicyAccepted" required style="width:auto;margin-top:4px;flex-shrink:0;">
+                <span>I kam kontrolluar të dhënat dhe e kuptoj politikën për produktet e personalizuara.</span>
+            </label>
 
             <button
                 type="submit"
@@ -708,30 +704,6 @@
                 return;
             }
 
-            // Nëse porosia është ruajtur por Paysera nuk u hap, provo vetëm pagesën përsëri.
-            const pendingOrderId = localStorage.getItem("imprezaPendingOrderId");
-            if (pendingOrderId) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = "Duke hapur pagesën...";
-                try {
-                    const payResponse = await fetch(API_URL + "/api/paysera/create-payment", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ orderId: Number(pendingOrderId) })
-                    });
-                    const payData = await payResponse.json();
-                    if (!payResponse.ok || !payData.paymentUrl) {
-                        throw new Error(payData.message || "Nuk u krijua lidhja e pagesës.");
-                    }
-                    window.location.href = payData.paymentUrl;
-                } catch (paymentError) {
-                    showMessage("Porosia është ruajtur, por pagesa nuk u nis: " + paymentError.message, "error");
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Provo pagesën përsëri";
-                }
-                return;
-            }
-
             submitBtn.disabled =
                 true;
 
@@ -763,17 +735,7 @@
                     .value
                     .trim();
 
-            const paymentMethod =
-                document
-                    .getElementById("paymentMethod")
-                    .value;
-
-            if (paymentMethod !== "card_pending") {
-                showMessage("Zgjidh pagesën me kartelë për të vazhduar.", "error");
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Dërgo porosinë";
-                return;
-            }
+            const paymentMethod = "cash_on_delivery";
 
             const text =
                 document
@@ -916,50 +878,13 @@
                 }
 
 
-                /*
-                    Nis pagesën e sigurt në Paysera pasi porosia të jetë ruajtur.
-                */
-                if (!data.orderId) {
-                    throw new Error("Porosia u ruajt, por serveri nuk ktheu numrin e porosisë. Kontakto administrimin.");
-                }
+                localStorage.removeItem("cart");
+                localStorage.removeItem("imprezaCart");
+                localStorage.removeItem("orderData");
+                localStorage.removeItem("imprezaPendingOrderId");
 
-                localStorage.setItem("imprezaPendingOrderId", String(data.orderId));
-                const payResponse = await fetch(API_URL + "/api/paysera/create-payment", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ orderId: Number(data.orderId) })
-                });
-                const payData = await payResponse.json();
-
-                if (!payResponse.ok || !payData.paymentUrl) {
-                    showMessage(
-                        "Porosia u ruajt, por pagesa nuk u nis: " + (payData.message || "Kontrollo konfigurimin Paysera në Railway."),
-                        "error"
-                    );
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Provo pagesën përsëri";
-                    return;
-                }
-
-                window.location.href = payData.paymentUrl;
-                return;
-
-                /*
-                    PASTRO CART-IN
-                */
-
-                localStorage.removeItem(
-                    "cart"
-                );
-
-                localStorage.removeItem(
-                    "imprezaCart"
-                );
-
-                localStorage.removeItem(
-                    "orderData"
-                );
-
+                showMessage("✅ Porosia u dërgua me sukses! Pagesa bëhet në dorëzim. Do t'ju kontaktojmë për konfirmim.", "success");
+                submitBtn.textContent = "Porosia u dërgua";
 
             } catch (error) {
 
