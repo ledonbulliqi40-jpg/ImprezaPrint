@@ -310,7 +310,7 @@ app.post("/api/paysera/create-payment", async (req, res) => {
             return res.status(400).json({ success: false, message: "Totali i porosisë është i pavlefshëm." });
         }
         const baseUrl = String(process.env.PUBLIC_BASE_URL || "https://imprezaprint-production.up.railway.app").replace(/\/$/, "");
-        const data = new URLSearchParams({
+        const paymentParams = {
             projectid: projectId,
             orderid: String(orderId),
             amount: String(amount),
@@ -318,9 +318,10 @@ app.post("/api/paysera/create-payment", async (req, res) => {
             accepturl: baseUrl + "/paysera/return?result=success",
             cancelurl: baseUrl + "/paysera/return?result=cancel",
             callbackurl: baseUrl + "/api/paysera/callback",
-            version: "1.8",
-            test: process.env.PAYSERA_TEST_MODE === "true" ? "1" : "0"
-        }).toString();
+            version: "1.8"
+        };
+        if (process.env.PAYSERA_TEST_MODE === "true") paymentParams.test = "1";
+        const data = new URLSearchParams(paymentParams).toString();
         const encoded = Buffer.from(data, "utf8").toString("base64").replace(/\//g, "_").replace(/\+/g, "-");
         const sign = require("crypto").createHash("md5").update(encoded + password, "utf8").digest("hex");
         const paymentUrl = "https://www.paysera.com/pay/?" + new URLSearchParams({ data: encoded, sign }).toString();
