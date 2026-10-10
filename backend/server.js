@@ -287,6 +287,52 @@ app.post("/api/orders", async (req, res) => {
     }
 });
 
+app.post("/api/paysera/create-payment", async (req, res) => {
+    try {
+        const projectId = String(process.env.PAYSERA_PROJECT_ID || "").trim();
+        const password = String(process.env.PAYSERA_PROJECT_PASSWORD || "");
+        if (!projectId || !password) {
+            return res.status(503).json({ success: false, message: "Paysera nuk është konfiguruar ende në Railway." });
+        }
+        const orderId = Number(req.body && req.body.orderId);
+        if (!Number.isSafeInteger(orderId) || orderId <= 0) {
+            return res.status(400).json({ success: false, message: "Numri i porosisë është i pavlefshëm." });
+        }
+        const [rows] = await db.query("SELECT * FROM orders WHERE id = ? LIMIT 1", [orderId]);
+        if (!rows.length) return res.status(404).json({ success: false, message: "Porosia nuk u gjet." });
+        const order = rows[0];
+        const totalKey = Object.keys(order).find(k => ["total", "ordertotal", "order_total"].includes(k.toLowerCase()));
+        const amount = Math.round(Number(totalKey ? order[totalKey] : 0) * 100);
+        if (!Number.isSafeInteger(amount) || amount < 1) {
+            return res.status(400).json({ success: false, message: "Totali i porosisë është i pavlefshëm." });
+        }
+        const baseUrl = String(process.env.PUBLIC_BASE_URL || "https://imprezaprint-production.up.railway.app").replace(/\/$/, "");
+        const data = new URLSearchParams({
+            projectid: projectId,
+            orderid: String(orderId),
+            amount: String(amount),
+            currency: "EUR",
+            accepturl: baseUrl + "/paysera/return?result=success",
+            cancelurl: baseUrl + "/paysera/return?result=cancel",
+            callbackurl: baseUrl + "/api/paysera/callback",
+            version: "1.8",
+            test: process.env.PAYSERA_TEST_MODE === "true" ? "1" : "0"
+        }).toString();
+        const encoded = Buffer.from(data, "utf8").toString("base64").replace(/\//g, "_").replace(/\+/g, "-");
+        const sign = require("crypto").createHash("md5").update(encoded + password, "utf8").digest("hex");
+        const paymentUrl = "https://www.paysera.com/pay/?" + new URLSearchParams({ data: encoded, sign }).toString();
+        return res.json({ success: true, paymentUrl });
+    } catch (error) {
+        console.error("Paysera payment creation error:", error);
+        return res.status(500).json({ success: false, message: "Nuk u krijua lidhja e pagesës Paysera." });
+    }
+});
+
+app.get("/paysera/return", (req, res) => {
+    const success = req.query.result === "success";
+    res.status(200).type("html").send("<!doctype html><html lang='sq'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>ImprezaPrint</title><body style='font-family:Arial,sans-serif;max-width:620px;margin:60px auto;padding:24px'><h1>" + (success ? "Faleminderit për porosinë!" : "Pagesa u anulua") + "</h1><p>" + (success ? "Kontrolli i pagesës do të përditësohet nga Paysera." : "Pagesa u anulua. Mund të kthehesh në dyqan.") + "</p><a href='/'>Kthehu te ImprezaPrint</a></body></html>");
+});
+
 /* =========================
    UPDATE ORDER STATUS
 ========================= */
