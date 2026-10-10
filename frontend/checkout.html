@@ -501,24 +501,20 @@
 
     let orderData = null;
 
-    try {
+    // Provo të gjitha çelësat e shportës dhe përdor të parin që ka produkt të vlefshëm.
+    for (const storageKey of ["imprezaCart", "cart", "orderData"]) {
+        try {
+            const savedCart = localStorage.getItem(storageKey);
+            if (!savedCart) continue;
 
-        const savedCart =
-            localStorage.getItem("imprezaCart") ||
-            localStorage.getItem("cart") ||
-            localStorage.getItem("orderData");
-
-        if (savedCart) {
-            orderData = JSON.parse(savedCart);
+            const parsed = JSON.parse(savedCart);
+            if (parsed && typeof parsed === "object" && parsed.product) {
+                orderData = parsed;
+                break;
+            }
+        } catch (error) {
+            console.warn("Të dhënat e shportës nuk u lexuan nga " + storageKey, error);
         }
-
-    } catch (error) {
-
-        console.error(
-            "Gabim në leximin e porosisë:",
-            error
-        );
-
     }
 
 
@@ -695,12 +691,15 @@
 
 
             if (!orderData) {
-
                 showMessage(
-                    "❌ Nuk u gjetën të dhënat e produktit.",
+                    "Nuk u gjet produkti. Kthehu te Personalizo, zgjidh produktin dhe shtyp “Vazhdo te Porosia”.",
                     "error"
                 );
-
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Kthehu te Personalizimi";
+                submitBtn.onclick = function () {
+                    window.location.href = "personalizo.html";
+                };
                 return;
             }
 
