@@ -708,6 +708,29 @@
                 return;
             }
 
+            // Nëse porosia është ruajtur por Paysera nuk u hap, provo vetëm pagesën përsëri.
+            const pendingOrderId = localStorage.getItem("imprezaPendingOrderId");
+            if (pendingOrderId) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Duke hapur pagesën...";
+                try {
+                    const payResponse = await fetch(API_URL + "/api/paysera/create-payment", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ orderId: Number(pendingOrderId) })
+                    });
+                    const payData = await payResponse.json();
+                    if (!payResponse.ok || !payData.paymentUrl) {
+                        throw new Error(payData.message || "Nuk u krijua lidhja e pagesës.");
+                    }
+                    window.location.href = payData.paymentUrl;
+                } catch (paymentError) {
+                    showMessage("Porosia është ruajtur, por pagesa nuk u nis: " + paymentError.message, "error");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Provo pagesën përsëri";
+                }
+                return;
+            }
 
             submitBtn.disabled =
                 true;
@@ -894,18 +917,32 @@
 
 
                 /*
-                    SUKSES
+                    Nis pagesën e sigurt në Paysera pasi porosia të jetë ruajtur.
                 */
+                if (!data.orderId) {
+                    throw new Error("Porosia u ruajt, por serveri nuk ktheu numrin e porosisë. Kontakto administrimin.");
+                }
 
-                showMessage(
-                    "✅ Porosia u ruajt me sukses! Statusi i pagesës: në pritje të aktivizimit të pagesës me kartelë.",
-                    "success"
-                );
+                localStorage.setItem("imprezaPendingOrderId", String(data.orderId));
+                const payResponse = await fetch(API_URL + "/api/paysera/create-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ orderId: Number(data.orderId) })
+                });
+                const payData = await payResponse.json();
 
+                if (!payResponse.ok || !payData.paymentUrl) {
+                    showMessage(
+                        "Porosia u ruajt, por pagesa nuk u nis: " + (payData.message || "Kontrollo konfigurimin Paysera në Railway."),
+                        "error"
+                    );
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Provo pagesën përsëri";
+                    return;
+                }
 
-                checkoutForm.style.display =
-                    "none";
-
+                window.location.href = payData.paymentUrl;
+                return;
 
                 /*
                     PASTRO CART-IN
