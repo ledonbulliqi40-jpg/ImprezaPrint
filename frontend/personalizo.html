@@ -743,10 +743,23 @@
     productName.textContent =
         product;
 
+    const isPhoneCase = /^Case\b/i.test(product);
+
+    function getCasePrice(model) {
+        const match = String(model || "").match(/iPhone\s*(\d+)/i);
+        if (!match) return 10;
+        const generation = Number(match[1]);
+        if (generation >= 15 && generation <= 17) return 13;
+        if (generation >= 13 && generation <= 14) return 11;
+        return 10;
+    }
+
+    if (isPhoneCase && currentModel) {
+        price = getCasePrice(currentModel);
+    }
+
     productPrice.textContent =
         "€" + price.toFixed(2);
-
-    const isPhoneCase = /^Case\b/i.test(product);
     const phoneModelField = modelSelect.closest(".field");
     const phoneModelRow = document.getElementById("modelRow");
     if (phoneModelField) phoneModelField.style.display = isPhoneCase ? "block" : "none";
@@ -897,6 +910,12 @@
                 "phoneModel"
             ).textContent =
                 currentModel || "-";
+
+            if (isPhoneCase && currentModel) {
+                price = getCasePrice(currentModel);
+                productPrice.textContent = "€" + price.toFixed(2);
+                updateTotal();
+            }
 
         }
     );
