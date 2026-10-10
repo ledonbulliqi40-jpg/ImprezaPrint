@@ -336,6 +336,45 @@ app.get("/paysera/return", (req, res) => {
     res.status(200).type("html").send("<!doctype html><html lang='sq'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>ImprezaPrint</title><body style='font-family:Arial,sans-serif;max-width:620px;margin:60px auto;padding:24px'><h1>" + (success ? "Faleminderit për porosinë!" : "Pagesa u anulua") + "</h1><p>" + (success ? "Kontrolli i pagesës do të përditësohet nga Paysera." : "Pagesa u anulua. Mund të kthehesh në dyqan.") + "</p><a href='/'>Kthehu te ImprezaPrint</a></body></html>");
 });
 
+app.get("/api/paysera/callback", async (req, res) => {
+    try {
+        const password = String(process.env.PAYSERA_PROJECT_PASSWORD || "");
+        const encoded = String(req.query.data || "");
+        const signature = String(req.query.ss1 || "");
+        if (!password || !encoded || !signature) return res.status(400).type("text/plain").send("Invalid callback");
+        const crypto = require("crypto");
+        const expected = crypto.createHash("md5").update(encoded + password, "utf8").digest("hex");
+        const receivedBuffer = Buffer.from(signature);
+        const expectedBuffer = Buffer.from(expected);
+        if (receivedBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(receivedBuffer, expectedBuffer)) return res.status(400).type("text/plain").send("Invalid signature");
+        const decoded = Buffer.from(encoded.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+        const callbackData = Object.fromEntries(new URLSearchParams(decoded).entries());
+        const orderId = Number(callbackData.orderid);
+        const status = String(callbackData.status || "");
+        if (!Number.isSafeInteger(orderId) || orderId <= 0) return res.status(400).type("text/plain").send("Invalid order");
+        await ensureOrderShippingColumns();
+        const [rows] = await db.query("SELECT * FROM orders WHERE id = ? LIMIT 1", [orderId]);
+        if (!rows.length) return res.status(404).type("text/plain").send("Order not found");
+        const order = rows[0];
+        const keys = Object.keys(order);
+        const totalKey = keys.find(key => ["total", "ordertotal", "order_total"].includes(key.toLowerCase()));
+        const currency = String(callbackData.currency || callbackData.paycurrency || "").toUpperCase();
+        const receivedAmount = Number(callbackData.amount || callbackData.payamount);
+        const expectedAmount = Math.round(Number(totalKey ? order[totalKey] : 0) * 100);
+        if (currency !== "EUR" || !Number.isFinite(receivedAmount) || receivedAmount !== expectedAmount) return res.status(400).type("text/plain").send("Amount mismatch");
+        if (status === "1") {
+            await db.query("UPDATE orders SET paymentStatus = ? WHERE id = ?", ["paid", orderId]);
+            console.log("Paysera payment confirmed for order", orderId);
+        } else {
+            console.log("Paysera payment not confirmed; status:", status, "order:", orderId);
+        }
+        return res.type("text/plain").send("OK");
+    } catch (error) {
+        console.error("Paysera callback error:", error);
+        return res.status(500).type("text/plain").send("Callback error");
+    }
+});
+
 /* =========================
    UPDATE ORDER STATUS
 ========================= */
